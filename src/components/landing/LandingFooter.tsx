@@ -51,7 +51,14 @@ export default function LandingFooter() {
           <p className="text-sm text-muted-foreground">© 2026 JobFlow AI. All rights reserved.</p>
           <div className="flex items-center gap-4 text-sm text-muted-foreground">
             <button className="hover:text-foreground transition-colors">Twitter</button>
-            <button className="hover:text-foreground transition-colors">LinkedIn</button>
+            <a
+              href="https://www.linkedin.com/in/shahroz-imran-7403202a2/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hover:text-foreground transition-colors"
+            >
+              LinkedIn
+            </a>
             <a
               href="https://github.com/shahrozimran/JobFlow-AI"
               target="_blank"
