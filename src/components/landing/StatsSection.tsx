@@ -49,7 +49,7 @@ function AnimatedCounter({ target, suffix = "" }: { target: string; suffix?: str
   }, [isInView, target]);
 
   return (
-    <div ref={ref} className="text-4xl md:text-6xl font-extrabold tracking-tighter">
+    <div ref={ref} className="text-4xl md:text-6xl font-bold tracking-tighter">
       {display}{suffix}
     </div>
   );
@@ -65,10 +65,10 @@ export default function StatsSection() {
 
   return (
     <section className="py-20 md:py-24 relative z-10 overflow-hidden bg-foreground text-background">
-      {/* Subtle gradient mesh */}
+      {/* Subtle glow mesh */}
       <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute top-0 left-1/4 w-96 h-96 bg-primary/10 blur-[120px] rounded-full" />
-        <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-info/10 blur-[120px] rounded-full" />
+        <div className="absolute top-0 left-1/4 w-96 h-96 bg-background/5 blur-[120px] rounded-full" />
+        <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-background/5 blur-[120px] rounded-full" />
       </div>
 
       <div className="max-w-6xl mx-auto px-6 relative z-10">

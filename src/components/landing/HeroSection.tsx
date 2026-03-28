@@ -26,10 +26,10 @@ export default function HeroSection() {
           </div>
 
           {/* Headline */}
-          <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-extrabold tracking-tight text-foreground leading-[1.08] mb-6">
+          <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight text-foreground leading-[1.08] mb-6">
             The resume that{" "}
             <br className="hidden sm:block" />
-            <span className="gradient-text-vibrant">gets you hired.</span>
+            <span className="text-muted-foreground">gets you hired.</span>
           </h1>
 
           {/* Subtext */}
@@ -43,7 +43,7 @@ export default function HeroSection() {
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
             <Link
               href="/dashboard"
-              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-4 rounded-full gradient-premium text-white font-semibold text-base shadow-lg hover:shadow-xl hover:shadow-accent-blue/25 transition-all active:scale-[0.98] hover:-translate-y-0.5"
+              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-4 rounded-full bg-foreground text-background font-semibold text-base shadow-lg hover:shadow-xl hover:shadow-foreground/10 transition-all active:scale-[0.98] hover:-translate-y-0.5"
             >
               Start for free <ArrowRight className="w-5 h-5" />
             </Link>
@@ -82,8 +82,8 @@ export default function HeroSection() {
               {/* Sidebar Mockup */}
               <div className="hidden md:flex w-1/4 flex-col gap-3 border-r border-border/30 pr-4">
                 <div className="flex items-center gap-2 mb-2">
-                  <div className="w-6 h-6 rounded-lg gradient-premium flex items-center justify-center">
-                    <Zap className="w-3 h-3 text-white" />
+                  <div className="w-6 h-6 rounded-lg bg-foreground flex items-center justify-center shadow-sm">
+                    <Zap className="w-3 h-3 text-background" />
                   </div>
                   <span className="text-xs font-bold text-foreground">JobFlow AI</span>
                 </div>
@@ -93,7 +93,7 @@ export default function HeroSection() {
                       key={item}
                       className={`text-xs px-3 py-2 rounded-lg font-medium ${
                         i === 1
-                          ? "bg-accent-blue/10 text-accent-blue"
+                          ? "bg-secondary text-foreground font-semibold border border-border/50 shadow-sm"
                           : "text-muted-foreground"
                       }`}
                     >
@@ -146,7 +146,7 @@ export default function HeroSection() {
                     </span>
                     <span className="text-lg font-bold text-foreground">0</span>
                   </div>
-                  <div className="flex-1 p-3 rounded-xl gradient-premium text-white flex items-center justify-center cursor-pointer hover:opacity-90 transition-opacity shadow-md">
+                  <div className="flex-1 p-3 rounded-xl bg-foreground text-background flex items-center justify-center cursor-pointer hover:opacity-90 transition-opacity shadow-md">
                     <span className="text-xs font-bold">Generate Resume</span>
                   </div>
                 </div>

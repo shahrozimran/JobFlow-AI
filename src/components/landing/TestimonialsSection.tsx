@@ -40,7 +40,7 @@ export default function TestimonialsSection() {
           viewport={{ once: true }}
           className="text-center max-w-2xl mx-auto mb-16 md:mb-20"
         >
-          <h2 className="text-3xl md:text-5xl font-extrabold tracking-tight text-foreground mb-5">
+          <h2 className="text-3xl md:text-5xl font-bold tracking-tight text-foreground mb-5">
             Don&apos;t just take our word for it.
           </h2>
           <p className="text-base md:text-lg text-muted-foreground">
@@ -55,8 +55,7 @@ export default function TestimonialsSection() {
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ delay: i * 0.1 }}
-              className="relative rounded-2xl border border-border/50 bg-card p-7 flex flex-col justify-between hover:border-primary/20 hover:shadow-lg transition-all duration-300 group"
+              className="relative rounded-2xl border border-border bg-card p-7 flex flex-col justify-between hover:border-foreground/20 hover:shadow-lg shadow-sm transition-all duration-300 group"
             >
               {/* Quote icon */}
               <div className="absolute top-6 right-6 text-muted-foreground/10">
@@ -78,7 +77,7 @@ export default function TestimonialsSection() {
               </p>
 
               <div className="flex items-center gap-3 mt-auto">
-                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary/20 to-info/20 border border-border/50 flex items-center justify-center font-bold text-primary text-sm">
+                <div className="w-10 h-10 rounded-full bg-foreground flex items-center justify-center font-bold text-background text-sm">
                   {test.author[0]}
                 </div>
                 <div>

@@ -12,10 +12,10 @@ export default function CTABanner() {
           initial={{ opacity: 0, scale: 0.97 }}
           whileInView={{ opacity: 1, scale: 1 }}
           viewport={{ once: true }}
-          className="relative rounded-3xl overflow-hidden border bg-background px-10 py-16 text-center shadow-lg sm:p-20"
+          className="relative rounded-3xl overflow-hidden border border-border bg-card px-10 py-16 text-center shadow-lg sm:p-20"
         >
           <div className="relative z-10">
-            <h2 className="text-3xl md:text-5xl font-extrabold tracking-tight text-foreground mb-6">
+            <h2 className="text-3xl md:text-5xl font-bold tracking-tight text-foreground mb-6">
               Ready to Transform Your
               <br className="hidden sm:block" /> Job Search?
             </h2>
@@ -26,7 +26,7 @@ export default function CTABanner() {
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
               <Link
                 href="/dashboard"
-                className="inline-flex items-center justify-center gap-2 px-8 py-4 rounded-full bg-primary text-primary-foreground font-bold text-base hover:bg-primary/90 transition-all active:scale-[0.98]"
+                className="inline-flex items-center justify-center gap-2 px-8 py-4 rounded-full bg-foreground text-background font-bold text-base hover:opacity-90 transition-all active:scale-[0.98]"
               >
                 Get Started Now <ArrowRight className="w-5 h-5" />
               </Link>

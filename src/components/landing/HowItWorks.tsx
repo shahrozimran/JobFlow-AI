@@ -37,7 +37,7 @@ export default function HowItWorks() {
           viewport={{ once: true }}
           className="text-center max-w-2xl mx-auto mb-16"
         >
-          <h2 className="text-3xl md:text-5xl font-extrabold tracking-tight text-foreground mb-5">
+          <h2 className="text-3xl md:text-5xl font-bold tracking-tight text-foreground mb-5">
             Simplicity at scale.
           </h2>
           <p className="text-base md:text-lg text-muted-foreground leading-relaxed">
@@ -61,11 +61,11 @@ export default function HowItWorks() {
             >
               {/* Step circle */}
               <div className="relative mb-8">
-                <div className="w-[104px] h-[104px] rounded-3xl bg-card border border-border/50 flex items-center justify-center shadow-md group-hover:shadow-lg group-hover:border-primary/30 transition-all duration-300">
-                  <step.icon className="w-7 h-7 text-primary" />
+                  <div className="w-[104px] h-[104px] rounded-3xl bg-card border border-border flex items-center justify-center shadow-sm group-hover:shadow-md group-hover:border-foreground/30 transition-all duration-300">
+                  <step.icon className="w-7 h-7 text-foreground" />
                 </div>
                 {/* Step number badge */}
-                <div className="absolute -top-2 -right-2 w-7 h-7 rounded-full bg-primary text-primary-foreground text-xs font-bold flex items-center justify-center shadow-sm">
+                <div className="absolute -top-2 -right-2 w-7 h-7 rounded-full bg-foreground text-background text-xs font-bold flex items-center justify-center shadow-sm">
                   {step.number}
                 </div>
               </div>

@@ -41,7 +41,7 @@ export default function FAQSection() {
           viewport={{ once: true }}
           className="text-center mb-14"
         >
-          <h2 className="text-3xl md:text-5xl font-extrabold tracking-tight text-foreground mb-5">
+          <h2 className="text-3xl md:text-5xl font-bold tracking-tight text-foreground mb-5">
             Frequently Asked Questions
           </h2>
           <p className="text-base md:text-lg text-muted-foreground">
@@ -59,9 +59,9 @@ export default function FAQSection() {
               <AccordionItem
                 key={i}
                 value={`item-${i}`}
-                className="border border-border/40 rounded-xl px-5 bg-card data-[state=open]:border-primary/20 data-[state=open]:shadow-sm transition-all"
+                className="border border-border rounded-xl px-5 bg-card data-[state=open]:border-foreground/30 data-[state=open]:shadow-sm transition-all"
               >
-                <AccordionTrigger className="text-left text-base font-medium py-5 hover:no-underline hover:text-foreground transition-colors data-[state=open]:text-foreground [&[data-state=open]>svg]:text-primary">
+                <AccordionTrigger className="text-left text-base font-medium py-5 hover:no-underline hover:text-foreground transition-colors data-[state=open]:text-foreground [&[data-state=open]>svg]:text-foreground">
                   {faq.q}
                 </AccordionTrigger>
                 <AccordionContent className="text-muted-foreground text-sm leading-relaxed pb-5">
