@@ -1,4 +1,4 @@
-import { Heart, Target, Users, Globe, Linkedin, Twitter, ArrowRight } from "lucide-react";
+import { Heart, Target, Users, Globe, Link2, MessageCircle, ArrowRight } from "lucide-react";
 import LandingNav from "@/components/landing/LandingNav";
 import LandingFooter from "@/components/landing/LandingFooter";
 import Link from "next/link";
@@ -166,7 +166,7 @@ export default function AboutPage() {
                     rel="noopener noreferrer"
                     className="p-2 rounded-xl bg-secondary/50 hover:bg-secondary hover:scale-110 transition-all duration-300"
                   >
-                    <Linkedin className="w-5 h-5 text-foreground/70" />
+                    <Link2 className="w-5 h-5 text-foreground/70" />
                   </a>
                 </div>
               </ScrollReveal>
