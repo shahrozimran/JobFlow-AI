@@ -1,9 +1,7 @@
-"use client";
-
-import { motion } from "framer-motion";
 import { Briefcase, Rocket, Heart, Brain, ArrowRight } from "lucide-react";
 import LandingNav from "@/components/landing/LandingNav";
 import LandingFooter from "@/components/landing/LandingFooter";
+import { ScrollReveal } from "@/components/ui/ScrollReveal";
 
 const perks = [
   { icon: Rocket, title: "Impactful Work", description: "Build AI tools that directly help thousands of job seekers land their dream roles." },
@@ -25,14 +23,14 @@ export default function Careers() {
         <section className="py-20 lg:py-28 relative overflow-hidden">
           <div className="absolute inset-0 gradient-hero" />
           <div className="relative max-w-4xl mx-auto px-6 text-center">
-            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
+            <ScrollReveal animationType="fade-up">
               <h1 className="text-4xl lg:text-5xl font-extrabold text-foreground mb-6">
                 Build the Future of <span className="text-foreground">Recruiting</span>
               </h1>
               <p className="text-lg text-muted-foreground leading-relaxed max-w-2xl mx-auto">
                 Join a mission-driven team dedicated to making the hiring process fairer, faster, and more human through Artificial Intelligence.
               </p>
-            </motion.div>
+            </ScrollReveal>
           </div>
         </section>
 
@@ -45,18 +43,16 @@ export default function Careers() {
             </div>
             <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
               {perks.map((perk, i) => (
-                <motion.div
+                <ScrollReveal
                   key={perk.title}
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
+                  animationType="fade-up"
                   transition={{ delay: i * 0.1 }}
                   className="card-elevated p-6 text-center"
                 >
                   <perk.icon className="w-10 h-10 text-foreground mx-auto mb-4" />
                   <h3 className="font-semibold text-foreground mb-2">{perk.title}</h3>
                   <p className="text-sm text-muted-foreground">{perk.description}</p>
-                </motion.div>
+                </ScrollReveal>
               ))}
             </div>
           </div>
@@ -69,11 +65,9 @@ export default function Careers() {
             <div className="space-y-4">
               {positions.length > 0 ? (
                 positions.map((pos, i) => (
-                  <motion.div
+                  <ScrollReveal
                     key={pos.title}
-                    initial={{ opacity: 0, x: -20 }}
-                    whileInView={{ opacity: 1, x: 0 }}
-                    viewport={{ once: true }}
+                    animationType="slide-right"
                     transition={{ delay: i * 0.1 }}
                     className="flex flex-col md:flex-row md:items-center justify-between p-6 rounded-xl border border-border bg-card hover:border-primary/50 transition-colors group cursor-pointer"
                   >
@@ -88,13 +82,11 @@ export default function Careers() {
                     <div className="mt-4 md:mt-0 flex items-center gap-2 text-foreground font-semibold text-sm">
                       View Details <ArrowRight className="w-4 h-4" />
                     </div>
-                  </motion.div>
+                  </ScrollReveal>
                 ))
               ) : (
-                <motion.div
-                  initial={{ opacity: 0, scale: 0.95 }}
-                  whileInView={{ opacity: 1, scale: 1 }}
-                  viewport={{ once: true }}
+                <ScrollReveal
+                  animationType="fade-up"
                   className="flex flex-col items-center justify-center py-16 px-6 rounded-3xl border border-dashed border-border bg-card/30 backdrop-blur-sm text-center"
                 >
                   <div className="w-20 h-20 rounded-full bg-foreground/5 flex items-center justify-center mb-6">
@@ -110,7 +102,7 @@ export default function Careers() {
                   >
                     Apply Spontaneously <ArrowRight className="w-4 h-4" />
                   </a>
-                </motion.div>
+                </ScrollReveal>
               )}
             </div>
             <p className="mt-12 text-center text-muted-foreground text-sm">

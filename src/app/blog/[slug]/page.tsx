@@ -1,16 +1,14 @@
-"use client";
-
-import { motion } from "framer-motion";
-import { useRouter, useParams } from "next/navigation";
-
 import { Calendar, User, ArrowLeft, Share2, Bookmark, Clock } from "lucide-react";
 import LandingNav from "@/components/landing/LandingNav";
 import LandingFooter from "@/components/landing/LandingFooter";
-import { blogPosts } from "@/data/blogPosts";
+import { blogPosts, BlogPostData } from "@/data/blogPosts";
+import Link from "next/link";
+import Image from "next/image";
+import { ScrollReveal } from "@/components/ui/ScrollReveal";
+import { notFound } from "next/navigation";
 
-export default function BlogPost() {
-  const { slug } = useParams();
-  const router = useRouter();
+export default function BlogPost({ params }: { params: { slug: string } }) {
+  const { slug } = params;
   const post = blogPosts.find(p => p.slug === slug);
 
   if (!post) {
@@ -19,12 +17,12 @@ export default function BlogPost() {
         <LandingNav />
         <div className="flex-grow flex flex-col items-center justify-center p-6">
           <h1 className="text-4xl font-bold mb-4">Post Not Found</h1>
-          <button 
-            onClick={() => router.push("/blog")}
+          <Link 
+            href="/blog"
             className="flex items-center gap-2 text-foreground font-semibold hover:underline"
           >
             <ArrowLeft className="w-4 h-4" /> Back to Blog
-          </button>
+          </Link>
         </div>
         <LandingFooter />
       </div>
@@ -36,22 +34,16 @@ export default function BlogPost() {
       <LandingNav />
       
       <main className="max-w-4xl mx-auto px-6 py-20 lg:py-28">
-        <motion.button
-          initial={{ opacity: 0, x: -10 }}
-          animate={{ opacity: 1, x: 0 }}
-          onClick={() => router.push("/blog")}
-          className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors mb-12 group"
+        <Link
+          href="/blog"
+          className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors mb-12 group"
         >
           <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
           Back to Blog
-        </motion.button>
+        </Link>
 
         <article>
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-          >
+          <ScrollReveal animationType="fade-up">
             <div className="flex items-center gap-2 mb-6">
               <span className="px-3 py-1 rounded-full bg-foreground/10 text-foreground text-xs font-bold">
                 {post.category}
@@ -91,11 +83,14 @@ export default function BlogPost() {
               </div>
             </div>
 
-            <div className="aspect-[21/9] rounded-3xl overflow-hidden mb-12">
-              <img 
+            <div className="relative aspect-[21/9] rounded-3xl overflow-hidden mb-12">
+              <Image 
                 src={post.image} 
                 alt={post.title} 
-                className="w-full h-full object-cover"
+                fill
+                className="object-cover"
+                sizes="(max-w-4xl) 100vw, 896px"
+                priority
               />
             </div>
 
@@ -103,7 +98,7 @@ export default function BlogPost() {
               className="prose prose-lg dark:prose-invert max-w-none prose-headings:text-foreground prose-p:text-muted-foreground prose-strong:text-foreground prose-blockquote:border-primary prose-blockquote:bg-foreground/5 prose-blockquote:py-1 prose-blockquote:px-6 prose-blockquote:rounded-r-xl"
               dangerouslySetInnerHTML={{ __html: post.content }}
             />
-          </motion.div>
+          </ScrollReveal>
         </article>
 
         {/* Next Posts CTA */}
@@ -114,13 +109,13 @@ export default function BlogPost() {
               .filter(p => p.slug !== post.slug)
               .slice(0, 2)
               .map(p => (
-                <div 
+                <Link 
                   key={p.slug}
-                  onClick={() => router.push(`/blog/${p.slug}`)}
+                  href={`/blog/${p.slug}`}
                   className="flex gap-6 group cursor-pointer"
                 >
-                  <div className="w-24 h-24 rounded-2xl overflow-hidden flex-shrink-0">
-                    <img src={p.image} className="w-full h-full object-cover group-hover:scale-110 transition-transform" />
+                  <div className="relative w-24 h-24 rounded-2xl overflow-hidden flex-shrink-0">
+                    <Image src={p.image} alt={p.title} fill className="object-cover group-hover:scale-110 transition-transform" sizes="96px" />
                   </div>
                   <div>
                     <h3 className="font-bold text-foreground group-hover:text-foreground transition-colors line-clamp-2 mb-2">
@@ -128,7 +123,7 @@ export default function BlogPost() {
                     </h3>
                     <div className="text-sm text-muted-foreground">{p.date}</div>
                   </div>
-                </div>
+                </Link>
               ))}
           </div>
         </section>

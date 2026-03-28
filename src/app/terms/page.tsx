@@ -1,6 +1,4 @@
-"use client";
-
-import { motion } from "framer-motion";
+import { ScrollReveal } from "@/components/ui/ScrollReveal";
 import LandingNav from "@/components/landing/LandingNav";
 import LandingFooter from "@/components/landing/LandingFooter";
 
@@ -10,11 +8,7 @@ export default function TermsOfService() {
       <LandingNav />
       
       <main className="max-w-4xl mx-auto px-6 py-20 lg:py-28">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-        >
+        <ScrollReveal animationType="fade-up">
           <h1 className="text-4xl lg:text-5xl font-extrabold text-foreground mb-8">Terms of Service</h1>
           <p className="text-muted-foreground mb-12">Last Updated: March 27, 2026</p>
 
@@ -103,7 +97,7 @@ export default function TermsOfService() {
               </p>
             </section>
           </div>
-        </motion.div>
+        </ScrollReveal>
       </main>
 
       <LandingFooter />

@@ -1,11 +1,8 @@
-"use client";
-
-import { motion } from "framer-motion";
 import { Brain, Target, Mail, BarChart3, Shield, Zap, FileText, Users, TrendingUp, Sparkles } from "lucide-react";
 import LandingNav from "@/components/landing/LandingNav";
 import LandingFooter from "@/components/landing/LandingFooter";
-import { useRouter } from "next/navigation";
-
+import Link from "next/link";
+import { ScrollReveal } from "@/components/ui/ScrollReveal";
 
 const features = [
   {
@@ -60,8 +57,6 @@ const stats = [
 ];
 
 export default function FeaturesPage() {
-  const router = useRouter();
-
   return (
     <div className="min-h-screen bg-background">
       <LandingNav />
@@ -71,7 +66,7 @@ export default function FeaturesPage() {
         <div className="absolute inset-0 gradient-hero" />
         <div className="absolute top-10 right-10 w-64 h-64 rounded-full bg-foreground/5 blur-3xl" />
         <div className="relative max-w-4xl mx-auto px-6 text-center">
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
+          <ScrollReveal animationType="fade-up">
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-foreground/10 text-foreground text-sm font-medium mb-6">
               <Sparkles className="w-4 h-4" />
               Platform Features
@@ -83,7 +78,7 @@ export default function FeaturesPage() {
               From resume optimization to personalized outreach, JobFlow AI provides a complete toolkit
               that transforms your job search from months of frustration into weeks of interviews.
             </p>
-          </motion.div>
+          </ScrollReveal>
         </div>
       </section>
 
@@ -92,18 +87,16 @@ export default function FeaturesPage() {
         <div className="max-w-5xl mx-auto px-6">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
             {stats.map((stat, i) => (
-              <motion.div
+              <ScrollReveal
                 key={stat.label}
-                initial={{ opacity: 0, y: 15 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
+                animationType="fade-up"
                 transition={{ delay: i * 0.1 }}
                 className="text-center"
               >
                 <stat.icon className="w-6 h-6 text-foreground mx-auto mb-2" />
                 <div className="text-3xl font-bold text-foreground">{stat.value}</div>
                 <div className="text-sm text-muted-foreground">{stat.label}</div>
-              </motion.div>
+              </ScrollReveal>
             ))}
           </div>
         </div>
@@ -114,11 +107,9 @@ export default function FeaturesPage() {
         <div className="max-w-6xl mx-auto px-6">
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             {features.map((feature, i) => (
-              <motion.div
+              <ScrollReveal
                 key={feature.title}
-                initial={{ opacity: 0, y: 25 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
+                animationType="fade-up"
                 transition={{ delay: i * 0.1 }}
                 className="card-elevated card-hover p-7"
               >
@@ -127,7 +118,7 @@ export default function FeaturesPage() {
                 </div>
                 <h3 className="text-lg font-semibold text-foreground mb-3">{feature.title}</h3>
                 <p className="text-sm text-muted-foreground leading-relaxed">{feature.description}</p>
-              </motion.div>
+              </ScrollReveal>
             ))}
           </div>
         </div>
@@ -135,11 +126,7 @@ export default function FeaturesPage() {
       {/* CTA */}
       <section className="py-20 bg-card">
         <div className="max-w-3xl mx-auto px-6 text-center">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-          >
+          <ScrollReveal animationType="fade-up">
             <h2 className="text-3xl lg:text-4xl font-bold text-foreground mb-4">
               Ready to Transform Your Job Search?
             </h2>
@@ -147,24 +134,20 @@ export default function FeaturesPage() {
               Join thousands of professionals who've already doubled their interview rate with JobFlow AI.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <motion.button
-                whileHover={{ scale: 1.03 }}
-                whileTap={{ scale: 0.98 }}
-                onClick={() => router.push("/dashboard")}
-                className="px-8 py-4 rounded-xl bg-foreground text-background font-semibold text-lg hover:opacity-90 transition-opacity"
+              <Link
+                href="/dashboard"
+                className="px-8 py-4 rounded-xl bg-foreground text-background font-semibold text-lg hover:opacity-90 transition-opacity hover:scale-105 active:scale-95 duration-200"
               >
                 Start Free — 20 Credits
-              </motion.button>
-              <motion.button
-                whileHover={{ scale: 1.03 }}
-                whileTap={{ scale: 0.98 }}
-                onClick={() => router.push("/#pricing")}
-                className="px-8 py-4 rounded-xl bg-secondary text-secondary-foreground font-semibold text-lg hover:bg-secondary/80 transition-colors"
+              </Link>
+              <Link
+                href="/#pricing"
+                className="px-8 py-4 rounded-xl bg-secondary text-secondary-foreground font-semibold text-lg hover:bg-secondary/80 transition-colors hover:scale-105 active:scale-95 duration-200"
               >
                 View Pricing
-              </motion.button>
+              </Link>
             </div>
-          </motion.div>
+          </ScrollReveal>
         </div>
       </section>
 
