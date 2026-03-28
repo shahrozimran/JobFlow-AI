@@ -1,4 +1,6 @@
-import { useLocation, useNavigate } from "react-router-dom";
+"use client";
+
+import { usePathname, useRouter } from "next/navigation";
 import { LayoutDashboard, FileText, Briefcase, Mail, Settings, CreditCard, Zap, ChevronLeft, ChevronRight } from "lucide-react";
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -11,8 +13,8 @@ const navItems = [
 ];
 
 export default function AppSidebar() {
-  const location = useLocation();
-  const navigate = useNavigate();
+  const pathname = usePathname();
+  const router = useRouter();
   const [collapsed, setCollapsed] = useState(false);
 
   return (
@@ -43,11 +45,11 @@ export default function AppSidebar() {
       {/* Nav */}
       <nav className="flex-1 px-3 py-4 space-y-1">
         {navItems.map((item) => {
-          const active = location.pathname === item.path;
+          const active = pathname === `/dashboard${item.path.replace('/dashboard', '')}`;
           return (
             <button
               key={item.path}
-              onClick={() => navigate(item.path)}
+              onClick={() => router.push(item.path.startsWith('/dashboard') ? item.path : `/dashboard${item.path.replace(/^\//, '')}`)}
               className={`sidebar-link w-full ${active ? "active" : ""}`}
             >
               <item.icon className="w-5 h-5 flex-shrink-0" />

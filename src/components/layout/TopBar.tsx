@@ -1,3 +1,5 @@
+"use client";
+
 import { Bell, Search } from "lucide-react";
 import { ThemeToggle } from "../ThemeToggle";
 
@@ -9,16 +11,16 @@ export default function TopBar() {
         <input
           type="text"
           placeholder="Search jobs, resumes..."
-          className="w-full pl-10 pr-4 py-2 rounded-lg bg-secondary text-sm text-foreground placeholder:text-muted-foreground border-0 outline-none focus:ring-2 focus:ring-primary/20 transition-shadow"
+          className="w-full pl-10 pr-4 py-2 rounded-lg bg-secondary text-sm text-foreground placeholder:text-muted-foreground border-0 outline-none focus:ring-2 focus:ring-foreground/20 transition-shadow"
         />
       </div>
       <div className="flex items-center gap-4">
         <ThemeToggle />
         <button className="relative p-2 rounded-lg hover:bg-secondary transition-colors">
           <Bell className="w-5 h-5 text-muted-foreground" />
-          <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-primary rounded-full" />
+          <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-foreground rounded-full" />
         </button>
-        <div className="w-9 h-9 rounded-full bg-primary flex items-center justify-center text-primary-foreground text-sm font-semibold">
+        <div className="w-9 h-9 rounded-full bg-foreground flex items-center justify-center text-background text-sm font-semibold">
           JD
         </div>
       </div>
