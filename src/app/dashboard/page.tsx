@@ -426,3 +426,66 @@ export default function Dashboard() {
     </div>
   );
 }
+
+function StatCard({ title, value, trend, icon: Icon, color, bg, border }: any) {
+  return (
+    <motion.div 
+      initial={{ opacity: 0, scale: 0.95 }}
+      animate={{ opacity: 1, scale: 1 }}
+      className="bg-background/80 backdrop-blur-xl border border-border/50 p-6 rounded-3xl shadow-sm hover:shadow-md transition-shadow"
+    >
+      <div className="flex items-center justify-between mb-4">
+        <div className={`w-12 h-12 rounded-2xl ${bg} ${color} flex items-center justify-center border ${border}`}>
+          <Icon className="w-6 h-6" />
+        </div>
+        <span className="text-xs font-bold text-success bg-success/10 border border-success/20 px-2 py-1 rounded-full">{trend}</span>
+      </div>
+      <div>
+        <p className="text-sm font-semibold text-muted-foreground mb-1">{title}</p>
+        <p className="text-3xl font-black tracking-tight text-foreground">{value}</p>
+      </div>
+    </motion.div>
+  );
+}
+
+function StatusBadge({ status }: { status: string }) {
+  if (status === "Active") {
+    return (
+      <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-blue-500/10 text-blue-500 border border-blue-500/20">
+        <span className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse" /> Active
+      </span>
+    );
+  }
+  if (status === "Draft") {
+    return (
+      <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-muted text-muted-foreground border border-border/50">
+        <Clock className="w-3 h-3" /> Draft
+      </span>
+    );
+  }
+  return (
+    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-success/10 text-success border border-success/20">
+      <CheckCircle2 className="w-3 h-3" /> Complete
+    </span>
+  );
+}
+
+function UserIcon(props: any) {
+  return (
+    <svg
+      {...props}
+      xmlns="http://www.w3.org/2000/svg"
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" />
+      <circle cx="12" cy="7" r="4" />
+    </svg>
+  );
+}

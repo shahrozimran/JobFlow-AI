@@ -34,7 +34,7 @@ export default function SettingsPage() {
   };
 
   return (
-    <div className="space-y-6 max-w-3xl">
+    <div className="space-y-6 max-w-4xl">
       <div>
         <h1 className="text-2xl font-bold text-foreground">Settings & Billing</h1>
         <p className="text-muted-foreground">Manage your account details and subscription preferences.</p>
