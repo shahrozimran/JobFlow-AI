@@ -6,7 +6,7 @@ import {
   AlertCircle, Zap, User, Briefcase, GraduationCap, 
   Plus, Trash2, Download, Eye, Layers, Mail, Phone, MapPin
 } from "lucide-react";
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { toast } from "sonner";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
@@ -110,7 +110,39 @@ export default function ResumeWorkspace() {
   });
   const [newSkill, setNewSkill] = useState("");
   const previewRef = useRef<HTMLDivElement>(null);
-  const fitScore = 72;
+  const [fitScore, setFitScore] = useState(0);
+  const [jobContext, setJobContext] = useState<{ desc: string; type: string } | null>(null);
+
+  useEffect(() => {
+    // Load Master Profile if it exists
+    const storedProfile = localStorage.getItem("masterProfile");
+    if (storedProfile) {
+      try {
+        setResumeData(JSON.parse(storedProfile));
+        setMode("manual");
+      } catch (e) {
+        console.error("Failed to parse master profile", e);
+      }
+    }
+
+    // Load Job Context if it exists
+    const desc = localStorage.getItem("currentJobDescription");
+    const type = localStorage.getItem("currentOptimizationType");
+    
+    if (desc && type) {
+      setJobContext({ desc, type });
+      setFitScore(Math.floor(Math.random() * (99 - 85 + 1) + 85)); // Mock AI score calculation
+      
+      // Auto-select corresponding template style
+      if (type === "ats") {
+        setSelectedTemplate("ats");
+      } else {
+        setSelectedTemplate("modern");
+      }
+    } else {
+      setFitScore(72);
+    }
+  }, []);
 
   const handleUpdatePersonal = (field: keyof ResumeData["personal"], value: string) => {
     setResumeData(prev => ({
@@ -475,9 +507,14 @@ export default function ResumeWorkspace() {
               </Tabs>
 
               <div className="pt-6 border-t border-border mt-10">
-                <h4 className="text-xs font-bold text-muted-foreground uppercase tracking-[0.2em] mb-4">Template Selection</h4>
+                <div className="flex items-center justify-between mb-4">
+                  <h4 className="text-xs font-bold text-muted-foreground uppercase tracking-[0.2em]">Template Selection</h4>
+                  {jobContext?.type === 'ats' && (
+                    <Badge variant="outline" className="text-success border-success/20 bg-success/5 text-[10px]">ATS Mode Active (Styles Restricted)</Badge>
+                  )}
+                </div>
                 <div className="grid grid-cols-3 gap-3">
-                  {templates.map((t) => (
+                  {templates.filter(t => jobContext?.type === 'ats' ? ['ats', 'minimal'].includes(t.id) : true).map((t) => (
                     <button key={t.id} onClick={() => setSelectedTemplate(t.id)} className={`p-4 rounded-xl border transition-all text-center group ${selectedTemplate === t.id ? "border-primary bg-primary/5 ring-4 ring-primary/10" : "border-border hover:border-primary/40 bg-card"}`}>
                       <t.icon className={`w-5 h-5 mx-auto mb-2 transition-transform group-hover:scale-110 ${selectedTemplate === t.id ? t.color : "text-muted-foreground"}`} />
                       <p className="text-[10px] font-black uppercase tracking-tighter line-clamp-1">{t.name.split(" ")[0]}</p>

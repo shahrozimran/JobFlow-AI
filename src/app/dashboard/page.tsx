@@ -1,175 +1,192 @@
 "use client";
 
+import { useState } from "react";
 import { motion } from "framer-motion";
-import { FileText, Briefcase, TrendingUp, Zap, ArrowRight, ChevronRight, History } from "lucide-react";
-import { useRouter } from "next/navigation";
-import Link from "next/link";
+import { 
+  Search, Filter, ArrowUpDown, MoreHorizontal, 
+  FileText, CheckCircle2, Clock, Zap, Download
+} from "lucide-react";
+import { ResumeCreationModal } from "@/components/ResumeCreationModal";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 
-const recentMatches = [
-  { title: "Senior Frontend Engineer", company: "Stripe", score: 92, status: "matched" },
-  { title: "Full Stack Developer", company: "Vercel", score: 85, status: "matched" },
-  { title: "React Developer", company: "Linear", score: 78, status: "analyzing" },
-  { title: "Software Engineer II", company: "Notion", score: 88, status: "matched" },
-];
-
-const creditBreakdown = [
-  { label: "Resume Parsing", cost: 2, used: 12, icon: FileText },
-  { label: "ATS Analysis", cost: 2, used: 18, icon: TrendingUp },
-  { label: "Email Outreach", cost: 1, used: 7, icon: Zap },
+// Dummy data matching Image 2 table layout intent
+const tableData = [
+  { id: 1, target: "Senior Frontend Engineer", company: "Stripe", status: "Active", optimization: "ATS", score: "88%", start: "28 Mar 2026", end: "Forever" },
+  { id: 2, target: "Full Stack Developer", company: "Vercel", status: "Active", optimization: "ATS", score: "92%", start: "28 Mar 2026", end: "10 Jun 2026" },
+  { id: 3, target: "React Developer", company: "Linear", status: "Draft", optimization: "Non-ATS", score: "—", start: "25 Mar 2026", end: "10 Jun 2026" },
+  { id: 4, target: "Software Engineer II", company: "Notion", status: "Complete", optimization: "ATS", score: "95%", start: "20 Mar 2026", end: "10 Jun 2026" },
+  { id: 5, target: "Frontend Architect", company: "Airbnb", status: "Active", optimization: "ATS", score: "81%", start: "18 Mar 2026", end: "Forever" },
+  { id: 6, target: "UI Engineer", company: "Figma", status: "Active", optimization: "Non-ATS", score: "—", start: "15 Mar 2026", end: "10 Jun 2026" },
+  { id: 7, target: "Creative Developer", company: "Apple", status: "Draft", optimization: "Non-ATS", score: "—", start: "10 Mar 2026", end: "Forever" },
+  { id: 8, target: "Web Developer", company: "Shopify", status: "Complete", optimization: "ATS", score: "89%", start: "05 Mar 2026", end: "10 Jun 2026" },
 ];
 
 export default function Dashboard() {
-  const router = useRouter();
+  const [activeTab, setActiveTab] = useState("All");
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const filteredData = activeTab === "All" 
+    ? tableData 
+    : tableData.filter(item => item.status === activeTab);
 
   return (
-    <div className="relative min-h-[calc(100vh-4rem)] p-4 md:p-8 overflow-hidden">
-      {/* Subtle Mesh Background */}
-      <div className="absolute inset-0 bg-gradient-to-br from-background via-background to-secondary/30 -z-10 pointer-events-none" />
+    <div className="min-h-[calc(100vh-4rem)] p-6 md:p-10 bg-background text-foreground animate-in fade-in duration-500">
       
-      <div className="max-w-5xl mx-auto space-y-8">
-        <motion.div 
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="space-y-1"
-        >
-          <h1 className="text-3xl font-bold tracking-tight text-foreground">Welcome back, John</h1>
-          <p className="text-muted-foreground text-lg tracking-tight">Here's what's happening with your job search today.</p>
-        </motion.div>
+      {/* Header Section */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight text-foreground">Resumes</h1>
+          <p className="text-sm text-muted-foreground mt-1">Application Status and Target Matches</p>
+        </div>
+        <div className="flex items-center gap-3">
+          <Button variant="outline" className="gap-2 bg-background border-border shadow-sm">
+            <Download className="w-4 h-4" /> Export
+          </Button>
+          <Button onClick={() => setIsModalOpen(true)} className="bg-primary text-primary-foreground shadow-sm px-6">
+            Create resume
+          </Button>
+        </div>
+      </div>
 
-        {/* Credit Widget */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.05 }}
-          className="bg-background/60 backdrop-blur-xl border border-border/50 shadow-sm rounded-3xl p-6 md:p-8"
-        >
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-xl font-semibold tracking-tight text-foreground">Credit Overview</h2>
-            <Link href="/dashboard/activity" className="text-sm font-medium text-primary hover:underline underline-offset-4 flex items-center gap-1.5">
-              <History className="w-3.5 h-3.5" />
-              View History
-            </Link>
-          </div>
-          
-          <div className="flex flex-col md:flex-row items-center gap-8 md:gap-12">
-             {/* Progress Ring */}
-            <div className="relative w-32 h-32 flex-shrink-0">
-              <svg viewBox="0 0 100 100" className="w-full h-full -rotate-90 filter drop-shadow-sm">
-                <circle cx="50" cy="50" r="42" fill="none" stroke="hsl(var(--secondary))" strokeWidth="8" />
-                <circle
-                  cx="50" cy="50" r="42" fill="none" stroke="hsl(var(--primary))" strokeWidth="8"
-                  strokeDasharray={`${(145 / 200) * 264} 264`}
-                  strokeLinecap="round"
-                  className="drop-shadow-sm transition-all duration-1000 ease-out"
-                />
-              </svg>
-              <div className="absolute inset-0 flex flex-col items-center justify-center">
-                <span className="text-3xl font-bold tracking-tighter text-foreground">145</span>
-                <span className="text-xs font-medium text-muted-foreground">/ 200</span>
-              </div>
-            </div>
-
-            {/* Breakdown Grid */}
-            <div className="flex-1 w-full grid grid-cols-1 sm:grid-cols-3 gap-4">
-              {creditBreakdown.map((item) => (
-                <div key={item.label} className="p-4 rounded-2xl bg-secondary/30 border border-border/40 flex flex-col items-start transition-colors hover:bg-secondary/50">
-                  <div className="flex items-center gap-2 mb-3">
-                    <div className="w-8 h-8 rounded-full bg-background shadow-sm flex items-center justify-center">
-                      <item.icon className="w-4 h-4 text-primary" />
-                    </div>
-                  </div>
-                  <p className="text-2xl font-bold tracking-tight text-foreground">{item.used}</p>
-                  <p className="text-sm font-medium text-muted-foreground mb-1">{item.label}</p>
-                  <p className="text-xs text-muted-foreground/70">{item.cost} credits / action</p>
-                </div>
-              ))}
-            </div>
-          </div>
-        </motion.div>
-
-        {/* Quick Actions */}
-        <div className="grid md:grid-cols-2 gap-6">
-          <motion.button
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1 }}
-            onClick={() => router.push("/dashboard/resume-workspace")}
-            className="group relative overflow-hidden bg-background/60 backdrop-blur-xl border border-border/50 shadow-sm hover:shadow-md rounded-3xl p-8 text-left transition-all duration-300 hover:-translate-y-1"
-          >
-            <div className="absolute top-0 right-0 p-8 opacity-0 group-hover:opacity-100 transition-opacity translate-x-4 group-hover:translate-x-0 duration-300">
-              <ChevronRight className="w-6 h-6 text-primary" />
-            </div>
-            <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center mb-6 shadow-sm border border-primary/20">
-              <FileText className="w-7 h-7 text-primary" />
-            </div>
-            <h3 className="text-xl font-bold tracking-tight text-foreground mb-2">Resume Optimization</h3>
-            <p className="text-sm text-muted-foreground mb-6 leading-relaxed max-w-sm">
-              Upload your resume and let our AI tailor it for ATS tracking immediately.
-            </p>
-            <span className="inline-flex items-center gap-2 text-sm text-primary font-semibold">
-              Get Started <ArrowRight className="w-4 h-4" />
-            </span>
-          </motion.button>
-
-          <motion.button
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.15 }}
-            onClick={() => router.push("/dashboard/outreach")}
-            className="group relative overflow-hidden bg-background/60 backdrop-blur-xl border border-border/50 shadow-sm hover:shadow-md rounded-3xl p-8 text-left transition-all duration-300 hover:-translate-y-1"
-          >
-            <div className="absolute top-0 right-0 p-8 opacity-0 group-hover:opacity-100 transition-opacity translate-x-4 group-hover:translate-x-0 duration-300">
-              <ChevronRight className="w-6 h-6 text-success" />
-            </div>
-            <div className="w-14 h-14 rounded-2xl bg-success/10 flex items-center justify-center mb-6 shadow-sm border border-success/20">
-              <Briefcase className="w-7 h-7 text-success" />
-            </div>
-            <h3 className="text-xl font-bold tracking-tight text-foreground mb-2">Automated Outreach</h3>
-            <p className="text-sm text-muted-foreground mb-6 leading-relaxed max-w-sm">
-              Find perfectly matched roles and send personalized connection emails in bulk.
-            </p>
-            <span className="inline-flex items-center gap-2 text-sm text-success font-semibold">
-              Discover Jobs <ArrowRight className="w-4 h-4" />
-            </span>
-          </motion.button>
+      {/* Controls Bar */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+        {/* Tabs */}
+        <div className="flex p-1 bg-secondary/30 border border-border/50 rounded-xl overflow-hidden self-start">
+          {["All", "Active", "Complete", "Draft"].map((tab) => (
+            <button
+              key={tab}
+              onClick={() => setActiveTab(tab)}
+              className={`px-6 py-2 text-sm font-semibold rounded-lg transition-all ${
+                activeTab === tab 
+                  ? "bg-background text-foreground shadow-sm" 
+                  : "text-muted-foreground hover:text-foreground hover:bg-secondary/40"
+              }`}
+            >
+              {tab}
+            </button>
+          ))}
         </div>
 
-        {/* Recent Matches */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
-          className="bg-background/60 backdrop-blur-xl border border-border/50 shadow-sm rounded-3xl p-6 md:p-8"
-        >
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-xl font-semibold tracking-tight text-foreground">Recent Matches</h2>
-            <button className="text-sm font-medium text-primary hover:underline underline-offset-4">View All</button>
+        {/* Filters & Search */}
+        <div className="flex items-center gap-3">
+          <Button variant="outline" className="gap-2 bg-background border-border/60 text-muted-foreground hover:text-foreground">
+            <Filter className="w-4 h-4" /> Filters
+          </Button>
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+            <input 
+              type="text" 
+              placeholder="Search..." 
+              className="w-64 pl-9 pr-4 py-2 text-sm rounded-lg border border-border/60 bg-background focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all font-medium placeholder:font-normal"
+            />
           </div>
-          <div className="space-y-0 divide-y divide-border/40 -mx-4">
-            {recentMatches.map((match) => (
-              <div
-                key={match.title}
-                className="flex items-center justify-between px-4 py-4 hover:bg-secondary/30 transition-colors cursor-pointer group"
-              >
-                <div>
-                  <p className="font-semibold tracking-tight text-foreground group-hover:text-primary transition-colors">{match.title}</p>
-                  <p className="text-sm text-muted-foreground">{match.company}</p>
-                </div>
-                <div className="flex items-center gap-4">
-                  <div className={`px-4 py-1.5 rounded-full text-xs font-bold ${
-                    match.status === "matched"
-                      ? "bg-success/10 text-success border border-success/20"
-                      : "bg-gold/10 text-gold border border-gold/20"
-                  }`}>
-                    {match.score}% fit
-                  </div>
-                  <ChevronRight className="w-5 h-5 text-muted-foreground/50 group-hover:text-foreground transition-colors" />
-                </div>
-              </div>
-            ))}
-          </div>
-        </motion.div>
+          <Button variant="outline" className="gap-2 bg-background border-border/60 text-muted-foreground hover:text-foreground">
+            <ArrowUpDown className="w-4 h-4" /> Sort order
+          </Button>
+        </div>
       </div>
+
+      {/* Main Table */}
+      <div className="bg-background border border-border/60 rounded-2xl overflow-hidden shadow-sm">
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm text-left whitespace-nowrap">
+            <thead className="text-xs text-muted-foreground uppercase tracking-widest bg-secondary/20 border-b border-border/60 font-bold">
+              <tr>
+                <th className="px-6 py-4 font-semibold w-12">
+                  <input type="checkbox" className="rounded border-border/50 bg-background text-primary focus:ring-primary" />
+                </th>
+                <th className="px-6 py-4 font-semibold">Target Role</th>
+                <th className="px-6 py-4 font-semibold">Status</th>
+                <th className="px-6 py-4 font-semibold">Optimization</th>
+                <th className="px-6 py-4 font-semibold">Fit Score</th>
+                <th className="px-6 py-4 font-semibold">Created Date</th>
+                <th className="px-6 py-4 font-semibold">Expiry</th>
+                <th className="px-6 py-4 font-semibold w-12"></th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-border/40">
+              {filteredData.map((row, idx) => (
+                <motion.tr 
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: idx * 0.05 }}
+                  key={row.id} 
+                  className="hover:bg-secondary/20 transition-colors group cursor-pointer"
+                >
+                  <td className="px-6 py-4">
+                    <input type="checkbox" className="rounded border-border/50 bg-background text-primary focus:ring-primary cursor-pointer" />
+                  </td>
+                  <td className="px-6 py-4">
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-full bg-secondary flex items-center justify-center font-bold text-foreground text-xs font-serif uppercase tracking-widest">
+                        {row.company.charAt(0)}
+                      </div>
+                      <div>
+                        <p className="font-bold text-foreground">{row.target}</p>
+                        <p className="text-xs text-muted-foreground">{row.company}</p>
+                      </div>
+                    </div>
+                  </td>
+                  <td className="px-6 py-4">
+                    <div className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold ${
+                      row.status === 'Active' ? 'bg-primary/10 text-primary border border-primary/20' :
+                      row.status === 'Complete' ? 'bg-success/10 text-success border border-success/20' :
+                      'bg-muted/40 text-muted-foreground border border-border'
+                    }`}>
+                      <div className={`w-1.5 h-1.5 rounded-full ${
+                        row.status === 'Active' ? 'bg-primary animate-pulse' :
+                        row.status === 'Complete' ? 'bg-success' :
+                        'bg-muted-foreground border border-background'
+                      }`} />
+                      {row.status}
+                    </div>
+                  </td>
+                  <td className="px-6 py-4 text-foreground font-medium">
+                    {row.optimization === 'ATS' ? (
+                      <span className="flex items-center gap-1">
+                        <FileText className="w-3.5 h-3.5 text-muted-foreground" /> ATS Parser
+                      </span>
+                    ) : (
+                      <span className="flex items-center gap-1">
+                        <Zap className="w-3.5 h-3.5 text-gold" /> Visual Design
+                      </span>
+                    )}
+                  </td>
+                  <td className="px-6 py-4 text-foreground font-semibold font-mono tracking-tight">
+                    {row.score}
+                  </td>
+                  <td className="px-6 py-4 text-muted-foreground text-sm">
+                    {row.start}
+                  </td>
+                  <td className="px-6 py-4 text-muted-foreground text-sm">
+                    {row.end}
+                  </td>
+                  <td className="px-6 py-4 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <button className="p-1.5 hover:bg-secondary rounded-md text-muted-foreground transition-colors">
+                      <MoreHorizontal className="w-5 h-5" />
+                    </button>
+                  </td>
+                </motion.tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        
+        {/* Pagination/Footer */}
+        <div className="px-6 py-4 border-t border-border/40 flex items-center justify-between text-sm text-muted-foreground font-medium bg-secondary/10">
+          <div>
+            1-10 of 240 • Results per page <select className="bg-background border border-border rounded px-2 py-1 ml-1 outline-none font-bold text-foreground shadow-sm"><option>10</option></select>
+          </div>
+          <div className="flex gap-2">
+            <button className="px-3 py-1.5 rounded border border-border bg-background hover:bg-secondary transition-colors">&lt;</button>
+            <span className="px-4 py-1.5 rounded text-foreground font-bold shadow-sm border border-border">1 / 9</span>
+            <button className="px-3 py-1.5 rounded border border-border bg-background hover:bg-secondary transition-colors">&gt;</button>
+          </div>
+        </div>
+      </div>
+
+      <ResumeCreationModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
     </div>
   );
 }
