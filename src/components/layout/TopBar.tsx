@@ -70,6 +70,7 @@ export default function TopBar() {
   const [notifications, setNotifications] = useState(initialNotifications);
   const [userEmail, setUserEmail] = useState<string | null>(null);
   const [userName, setUserName] = useState<string | null>(null);
+  const [userAvatar, setUserAvatar] = useState<string | null>(null);
   const unreadCount = notifications.filter((n) => n.unread).length;
   const supabase = createClient();
 
@@ -79,6 +80,19 @@ export default function TopBar() {
       if (user) {
         setUserEmail(user.email ?? null);
         setUserName(user.user_metadata?.full_name ?? "User");
+
+        // Fetch avatar from profiles table
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("avatar_url")
+          .eq("id", user.id)
+          .single();
+
+        if (profile?.avatar_url) {
+          setUserAvatar(profile.avatar_url);
+        } else if (user.user_metadata?.avatar_url) {
+          setUserAvatar(user.user_metadata.avatar_url);
+        }
       }
     }
     getUser();
@@ -262,7 +276,7 @@ export default function TopBar() {
           <DropdownMenuTrigger asChild>
             <button className="outline-none" aria-label="User menu">
               <Avatar className="h-8 w-8 cursor-pointer transition-transform hover:scale-105 active:scale-95 border border-border/50">
-                <AvatarImage src="" />
+                <AvatarImage src={userAvatar || ""} />
                 <AvatarFallback className="bg-gradient-to-br from-primary/20 to-info/20 text-primary font-semibold text-xs uppercase">
                   {userName ? userName.slice(0, 2) : "US"}
                 </AvatarFallback>
@@ -276,7 +290,7 @@ export default function TopBar() {
           >
             <div className="flex items-center gap-3 p-3 bg-muted/30 rounded-lg mb-1">
               <Avatar className="h-10 w-10 border border-border/50">
-                <AvatarImage src="" />
+                <AvatarImage src={userAvatar || ""} />
                 <AvatarFallback className="bg-gradient-to-br from-primary/20 to-info/20 text-primary font-bold text-sm uppercase">
                   {userName ? userName.slice(0, 2) : "US"}
                 </AvatarFallback>
@@ -291,14 +305,18 @@ export default function TopBar() {
               </div>
             </div>
 
-            <DropdownMenuItem className="py-2.5 px-3 rounded-lg cursor-pointer gap-3 text-sm">
-              <Settings className="w-4 h-4 text-muted-foreground" />
-              Settings
-            </DropdownMenuItem>
-            <DropdownMenuItem className="py-2.5 px-3 rounded-lg cursor-pointer gap-3 text-sm">
-              <Shield className="w-4 h-4 text-muted-foreground" />
-              Security
-            </DropdownMenuItem>
+            <Link href="/dashboard/settings">
+              <DropdownMenuItem className="py-2.5 px-3 rounded-lg cursor-pointer gap-3 text-sm">
+                <Settings className="w-4 h-4 text-muted-foreground" />
+                Settings
+              </DropdownMenuItem>
+            </Link>
+            <Link href="/dashboard/settings?tab=security">
+              <DropdownMenuItem className="py-2.5 px-3 rounded-lg cursor-pointer gap-3 text-sm">
+                <Shield className="w-4 h-4 text-muted-foreground" />
+                Security
+              </DropdownMenuItem>
+            </Link>
 
             <DropdownMenuSeparator className="my-1" />
 

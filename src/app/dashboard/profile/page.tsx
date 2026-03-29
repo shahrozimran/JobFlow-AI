@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   User,
@@ -19,6 +19,8 @@ import {
   MapPin,
   Mail,
   Phone,
+  Camera,
+  Loader2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -35,6 +37,8 @@ import {
   type Certification,
   type Project,
 } from "@/lib/profile-store";
+import { createClient } from "@/lib/supabase/client";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 function SectionCard({
   title,
@@ -88,10 +92,97 @@ function SectionCard({
 export default function ProfilePage() {
   const [profile, setProfile] = useState<UserProfile>(getProfile());
   const [skillInput, setSkillInput] = useState("");
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+  const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
+  const [userName, setUserName] = useState("");
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const supabase = createClient();
 
   useEffect(() => {
     setProfile(getProfile());
+    loadAvatar();
   }, []);
+
+  async function loadAvatar() {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+    setUserName(user.user_metadata?.full_name || user.email || "");
+
+    // Try to get avatar from profiles table
+    const { data } = await supabase
+      .from("profiles")
+      .select("avatar_url")
+      .eq("id", user.id)
+      .single();
+
+    if (data?.avatar_url) {
+      setAvatarUrl(data.avatar_url);
+    } else if (user.user_metadata?.avatar_url) {
+      // Fallback to Google avatar or auth metadata
+      setAvatarUrl(user.user_metadata.avatar_url);
+    }
+  }
+
+  async function handleAvatarUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Validate file
+    if (!['image/jpeg', 'image/png', 'image/webp', 'image/gif'].includes(file.type)) {
+      toast.error('Please upload a JPG, PNG, WebP, or GIF image.');
+      return;
+    }
+    if (file.size > 2 * 1024 * 1024) {
+      toast.error('Image must be under 2MB.');
+      return;
+    }
+
+    setIsUploadingAvatar(true);
+
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('Not authenticated');
+
+      const fileExt = file.name.split('.').pop();
+      const filePath = `${user.id}/avatar.${fileExt}`;
+
+      // Upload to Supabase storage
+      const { error: uploadError } = await supabase.storage
+        .from('avatars')
+        .upload(filePath, file, { upsert: true });
+
+      if (uploadError) throw uploadError;
+
+      // Get public URL
+      const { data: urlData } = supabase.storage
+        .from('avatars')
+        .getPublicUrl(filePath);
+
+      const publicUrl = urlData.publicUrl + '?t=' + Date.now(); // Cache bust
+
+      // Save to profiles table
+      const { error: dbError } = await supabase
+        .from('profiles')
+        .upsert({ id: user.id, avatar_url: publicUrl, updated_at: new Date().toISOString() });
+
+      if (dbError) throw dbError;
+
+      // Also update auth metadata
+      await supabase.auth.updateUser({
+        data: { avatar_url: publicUrl },
+      });
+
+      setAvatarUrl(publicUrl);
+      toast.success('Profile picture updated!');
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Upload failed';
+      toast.error(message);
+    } finally {
+      setIsUploadingAvatar(false);
+      // Reset file input so the same file can be re-selected
+      if (fileInputRef.current) fileInputRef.current.value = '';
+    }
+  }
 
   const handleSave = () => {
     saveProfile(profile);
@@ -185,9 +276,37 @@ export default function ProfilePage() {
 
   return (
     <div className="p-6 md:p-8 max-w-4xl mx-auto space-y-5 animate-in fade-in duration-500">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
+      {/* Header with Avatar */}
+      <div className="flex items-center gap-6">
+        {/* Avatar Upload */}
+        <div className="relative group">
+          <Avatar className="w-20 h-20 border-2 border-border/50">
+            <AvatarImage src={avatarUrl || ""} />
+            <AvatarFallback className="bg-muted text-muted-foreground text-xl font-semibold">
+              {userName ? userName.slice(0, 2).toUpperCase() : "US"}
+            </AvatarFallback>
+          </Avatar>
+          <button
+            onClick={() => fileInputRef.current?.click()}
+            disabled={isUploadingAvatar}
+            className="absolute inset-0 rounded-full bg-foreground/0 group-hover:bg-foreground/40 flex items-center justify-center transition-all cursor-pointer"
+          >
+            {isUploadingAvatar ? (
+              <Loader2 className="w-5 h-5 text-background animate-spin" />
+            ) : (
+              <Camera className="w-5 h-5 text-background opacity-0 group-hover:opacity-100 transition-opacity" />
+            )}
+          </button>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/jpeg,image/png,image/webp,image/gif"
+            onChange={handleAvatarUpload}
+            className="hidden"
+          />
+        </div>
+
+        <div className="flex-1">
           <h1 className="text-2xl font-bold tracking-tight text-foreground">
             Master Profile
           </h1>
