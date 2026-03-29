@@ -74,32 +74,35 @@ export default function Outreach() {
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
               onClick={(e) => e.stopPropagation()}
-              className="glass-card relative w-full max-w-lg p-6 z-10"
+              className="glass-card relative w-full max-w-lg p-6 z-10 max-h-[90vh] flex flex-col shadow-2xl"
               style={{ background: "rgba(255,255,255,0.85)", backdropFilter: "blur(20px)" }}
             >
               <button
                 onClick={() => setEmailModal(null)}
-                className="absolute top-4 right-4 p-1 rounded-lg hover:bg-secondary transition-colors"
+                className="absolute top-4 right-4 p-1.5 rounded-lg hover:bg-secondary transition-colors"
               >
                 <X className="w-4 h-4 text-muted-foreground" />
               </button>
-              <h3 className="text-lg font-bold text-foreground mb-1">Email Preview</h3>
-              <p className="text-sm text-muted-foreground mb-5">
-                Personalized outreach to {emailModal.company} — 1 credit
-              </p>
+              
+              <div className="shrink-0 mb-4">
+                <h3 className="text-lg font-bold text-foreground mb-1">Email Preview</h3>
+                <p className="text-sm text-muted-foreground">
+                  Personalized outreach to {emailModal.company} — 1 credit
+                </p>
+              </div>
 
-              <div className="space-y-3 mb-6">
+              <div className="space-y-3 mb-6 overflow-y-auto pr-1 flex-1">
                 <div>
                   <label className="text-xs font-medium text-muted-foreground">To</label>
-                  <p className="text-sm text-foreground">recruiting@{emailModal.company.toLowerCase()}.com</p>
+                  <p className="text-sm text-foreground font-medium">recruiting@{emailModal.company.toLowerCase()}.com</p>
                 </div>
                 <div>
                   <label className="text-xs font-medium text-muted-foreground">Subject</label>
-                  <p className="text-sm text-foreground">Application: {emailModal.title} — Experienced React Developer</p>
+                  <p className="text-sm text-foreground font-medium">Application: {emailModal.title} — Experienced React Developer</p>
                 </div>
                 <div>
                   <label className="text-xs font-medium text-muted-foreground">Body</label>
-                  <div className="mt-1 p-4 rounded-xl bg-secondary text-sm text-foreground leading-relaxed">
+                  <div className="mt-1.5 p-4 rounded-xl bg-secondary/50 text-sm text-foreground leading-relaxed">
                     <p className="mb-3">Dear Hiring Team at {emailModal.company},</p>
                     <p className="mb-3">
                       I'm writing to express my strong interest in the {emailModal.title} position.
@@ -116,7 +119,7 @@ export default function Outreach() {
                 </div>
               </div>
 
-              <div className="flex gap-3">
+              <div className="flex gap-3 shrink-0 pt-2 border-t border-border/40">
                 <button
                   onClick={() => setEmailModal(null)}
                   className="flex-1 py-3 rounded-xl bg-secondary text-secondary-foreground font-semibold text-sm hover:bg-secondary/80 transition-colors"
