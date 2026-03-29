@@ -90,7 +90,7 @@ function SectionCard({
 }
 
 export default function ProfilePage() {
-  const [profile, setProfile] = useState<UserProfile>(getProfile());
+  const [profile, setProfile] = useState<UserProfile | null>(null);
   const [skillInput, setSkillInput] = useState("");
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
@@ -99,7 +99,7 @@ export default function ProfilePage() {
   const supabase = createClient();
 
   useEffect(() => {
-    setProfile(getProfile());
+    getProfile().then(p => setProfile(p));
     loadAvatar();
   }, []);
 
@@ -185,15 +185,19 @@ export default function ProfilePage() {
   }
 
   const handleSave = () => {
+    if (!profile) return;
     saveProfile(profile);
     toast.success("Profile saved successfully");
   };
 
   const updateField = (field: keyof UserProfile, value: unknown) => {
-    setProfile((prev) => ({ ...prev, [field]: value }));
+    if (profile) {
+      setProfile({ ...profile, [field]: value });
+    }
   };
 
   const addExperience = () => {
+    if (!profile) return;
     const newExp: WorkExperience = {
       id: generateId(),
       title: "",
@@ -208,10 +212,12 @@ export default function ProfilePage() {
   };
 
   const removeExperience = (id: string) => {
+    if (!profile) return;
     updateField("experience", profile.experience.filter((e) => e.id !== id));
   };
 
   const updateExperience = (id: string, field: keyof WorkExperience, value: unknown) => {
+    if (!profile) return;
     updateField(
       "experience",
       profile.experience.map((e) => (e.id === id ? { ...e, [field]: value } : e))
@@ -219,6 +225,7 @@ export default function ProfilePage() {
   };
 
   const addEducation = () => {
+    if (!profile) return;
     const newEdu: Education = {
       id: generateId(),
       degree: "",
@@ -231,21 +238,24 @@ export default function ProfilePage() {
   };
 
   const removeEducation = (id: string) => {
+    if (!profile) return;
     updateField("education", profile.education.filter((e) => e.id !== id));
   };
 
   const addSkill = () => {
-    if (skillInput.trim() && !profile.skills.includes(skillInput.trim())) {
+    if (profile && skillInput.trim() && !profile.skills.includes(skillInput.trim())) {
       updateField("skills", [...profile.skills, skillInput.trim()]);
       setSkillInput("");
     }
   };
 
   const removeSkill = (skill: string) => {
+    if (!profile) return;
     updateField("skills", profile.skills.filter((s) => s !== skill));
   };
 
   const addProject = () => {
+    if (!profile) return;
     const newProj: Project = {
       id: generateId(),
       title: "",
@@ -257,10 +267,12 @@ export default function ProfilePage() {
   };
 
   const removeProject = (id: string) => {
+    if (!profile) return;
     updateField("projects", profile.projects.filter((p) => p.id !== id));
   };
 
   const addCertification = () => {
+    if (!profile) return;
     const newCert: Certification = {
       id: generateId(),
       name: "",
@@ -271,8 +283,17 @@ export default function ProfilePage() {
   };
 
   const removeCertification = (id: string) => {
+    if (!profile) return;
     updateField("certifications", profile.certifications.filter((c) => c.id !== id));
   };
+
+  if (!profile) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center -mt-20">
+        <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
 
   return (
     <div className="p-6 md:p-8 max-w-4xl mx-auto space-y-5 animate-in fade-in duration-500">
