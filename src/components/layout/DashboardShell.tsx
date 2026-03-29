@@ -13,11 +13,16 @@ export default function DashboardShell({ children }: { children: React.ReactNode
   const [checked, setChecked] = useState(false);
 
   useEffect(() => {
-    // Check if profile onboarding is completed
-    if (!isOnboarding && !isProfileComplete()) {
-      router.replace("/dashboard/onboarding");
+    async function checkProfile() {
+      // Check if profile onboarding is completed
+      const isComplete = await isProfileComplete();
+      if (!isOnboarding && !isComplete) {
+        router.replace("/dashboard/onboarding");
+      } else {
+        setChecked(true);
+      }
     }
-    setChecked(true);
+    checkProfile();
   }, [isOnboarding, router]);
 
   if (!checked) {

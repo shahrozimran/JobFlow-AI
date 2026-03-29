@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useRouter } from "next/navigation";
 import {
@@ -39,27 +39,40 @@ const steps = [
 export default function OnboardingPage() {
   const router = useRouter();
   const [currentStep, setCurrentStep] = useState(0);
-  const [profile, setProfile] = useState<UserProfile>(getProfile());
+  const [profile, setProfile] = useState<UserProfile | null>(null);
   const [skillInput, setSkillInput] = useState("");
+  const [isSaving, setIsSaving] = useState(false);
+
+  useEffect(() => {
+    getProfile().then(p => setProfile(p));
+  }, []);
 
   const updateField = (field: keyof UserProfile, value: unknown) => {
-    setProfile((prev) => ({ ...prev, [field]: value }));
+    if (profile) {
+      setProfile({ ...profile, [field]: value });
+    }
   };
 
   const canProceed = () => {
     switch (steps[currentStep].id) {
       case "personal":
-        return profile.firstName.trim() !== "" && profile.lastName.trim() !== "";
+        return profile && profile.firstName.trim() !== "" && profile.lastName.trim() !== "";
       default:
         return true;
     }
   };
 
-  const handleNext = () => {
-    if (currentStep < steps.length - 1) {
-      // Save on each step
-      saveProfile(profile);
-      setCurrentStep(currentStep + 1);
+  const handleNext = async () => {
+    if (currentStep < steps.length - 1 && profile) {
+      setIsSaving(true);
+      try {
+        await saveProfile(profile);
+        setCurrentStep(currentStep + 1);
+      } catch (error) {
+        toast.error("Failed to save profile. Please try again.");
+      } finally {
+        setIsSaving(false);
+      }
     }
   };
 
@@ -67,23 +80,45 @@ export default function OnboardingPage() {
     if (currentStep > 0) setCurrentStep(currentStep - 1);
   };
 
-  const handleComplete = () => {
-    saveProfile({ ...profile, completedOnboarding: true });
-    toast.success("Profile setup complete!");
-    router.replace("/dashboard");
+  const handleComplete = async () => {
+    if (!profile) return;
+    setIsSaving(true);
+    try {
+      await saveProfile({ ...profile, completedOnboarding: true });
+      toast.success("Profile setup complete!");
+      router.replace("/dashboard");
+    } catch {
+      toast.error("Failed to save final profile.");
+      setIsSaving(false);
+    }
   };
 
-  const handleSkip = () => {
-    saveProfile({ ...profile, completedOnboarding: true });
-    router.replace("/dashboard");
+  const handleSkip = async () => {
+    if (!profile) return;
+    setIsSaving(true);
+    try {
+      await saveProfile({ ...profile, completedOnboarding: true });
+      router.replace("/dashboard");
+    } catch {
+      toast.error("Failed to skip onboarding.");
+      setIsSaving(false);
+    }
   };
 
   const addSkill = () => {
-    if (skillInput.trim() && !profile.skills.includes(skillInput.trim())) {
+    if (profile && skillInput.trim() && !profile.skills.includes(skillInput.trim())) {
       updateField("skills", [...profile.skills, skillInput.trim()]);
       setSkillInput("");
     }
   };
+
+  if (!profile) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
 
   const progress = ((currentStep) / (steps.length - 1)) * 100;
 
@@ -520,10 +555,10 @@ export default function OnboardingPage() {
               </Button>
               <Button
                 onClick={handleNext}
-                disabled={!canProceed()}
+                disabled={!canProceed() || isSaving}
                 className="gap-2 rounded-xl shadow-sm"
               >
-                {currentStep === steps.length - 2 ? "Finish" : "Continue"}
+                {isSaving ? "Saving..." : (currentStep === steps.length - 2 ? "Finish" : "Continue")}
                 <ArrowRight className="w-4 h-4" />
               </Button>
             </div>

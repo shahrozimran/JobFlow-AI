@@ -62,11 +62,14 @@ export default function Dashboard() {
   });
 
   useEffect(() => {
-    const p = getProfile();
-    setProfile({ firstName: p.firstName, lastName: p.lastName });
-    setCompleteness(getProfileCompleteness());
-    setResumes(getResumes());
-    setStats(getResumeStats());
+    async function loadData() {
+      const p = await getProfile();
+      setProfile({ firstName: p.firstName, lastName: p.lastName });
+      setCompleteness(await getProfileCompleteness());
+      setResumes(getResumes());
+      setStats(getResumeStats());
+    }
+    loadData();
   }, []);
 
   const statCards = [

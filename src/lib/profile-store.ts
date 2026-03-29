@@ -1,4 +1,4 @@
-// Profile data store — localStorage-based until backend integration
+import { createClient } from "@/lib/supabase/client";
 
 export interface WorkExperience {
   id: string;
@@ -63,9 +63,7 @@ export interface UserProfile {
   lastUpdated: string;
 }
 
-const PROFILE_KEY = "jobflow_user_profile";
-
-const defaultProfile: UserProfile = {
+export const defaultProfile: UserProfile = {
   firstName: "",
   lastName: "",
   email: "",
@@ -83,35 +81,96 @@ const defaultProfile: UserProfile = {
   lastUpdated: new Date().toISOString(),
 };
 
-export function getProfile(): UserProfile {
+export async function getProfile(): Promise<UserProfile> {
   if (typeof window === "undefined") return defaultProfile;
+  
   try {
-    const stored = localStorage.getItem(PROFILE_KEY);
-    if (!stored) return defaultProfile;
-    return { ...defaultProfile, ...JSON.parse(stored) };
-  } catch {
+    const supabase = createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return defaultProfile;
+
+    const { data, error } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq('id', user.id)
+      .single();
+
+    if (error || !data) return defaultProfile;
+
+    return {
+      firstName: data.first_name || "",
+      lastName: data.last_name || "",
+      email: data.email || "",
+      phone: data.phone || "",
+      location: data.location || "",
+      linkedinUrl: data.linkedin_url || "",
+      portfolioUrl: data.portfolio_url || "",
+      summary: data.summary || "",
+      experience: data.experience || [],
+      education: data.education || [],
+      skills: data.skills || [],
+      certifications: data.certifications || [],
+      projects: data.projects || [],
+      completedOnboarding: data.completed_onboarding || false,
+      lastUpdated: data.updated_at || new Date().toISOString(),
+    };
+  } catch (error) {
+    console.error("Error fetching profile:", error);
     return defaultProfile;
   }
 }
 
-export function saveProfile(profile: Partial<UserProfile>): UserProfile {
-  const current = getProfile();
-  const updated = {
-    ...current,
-    ...profile,
-    lastUpdated: new Date().toISOString(),
-  };
-  localStorage.setItem(PROFILE_KEY, JSON.stringify(updated));
-  return updated;
+export async function saveProfile(profile: Partial<UserProfile>): Promise<UserProfile> {
+  try {
+    const supabase = createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) throw new Error("Not authenticated");
+
+    const currentProfile = await getProfile();
+    const newProfile = { ...currentProfile, ...profile };
+
+    const { error } = await supabase
+      .from('profiles')
+      .update({
+        first_name: newProfile.firstName,
+        last_name: newProfile.lastName,
+        email: newProfile.email,
+        phone: newProfile.phone,
+        location: newProfile.location,
+        linkedin_url: newProfile.linkedinUrl,
+        portfolio_url: newProfile.portfolioUrl,
+        summary: newProfile.summary,
+        experience: newProfile.experience,
+        education: newProfile.education,
+        skills: newProfile.skills,
+        certifications: newProfile.certifications,
+        projects: newProfile.projects,
+        completed_onboarding: newProfile.completedOnboarding,
+        updated_at: new Date().toISOString(),
+      })
+      .eq('id', user.id);
+
+    if (error) {
+      console.error("Supabase update error:", error);
+      throw error;
+    }
+    
+    return newProfile;
+  } catch (error) {
+    console.error("Error saving profile:", error);
+    throw error;
+  }
 }
 
-export function isProfileComplete(): boolean {
-  const p = getProfile();
+export async function isProfileComplete(): Promise<boolean> {
+  if (typeof window === "undefined") return false;
+  const p = await getProfile();
   return p.completedOnboarding;
 }
 
-export function getProfileCompleteness(): number {
-  const p = getProfile();
+export async function getProfileCompleteness(): Promise<number> {
+  if (typeof window === "undefined") return 0;
+  const p = await getProfile();
   let score = 0;
   const total = 8;
 
