@@ -26,7 +26,7 @@ export default function RootLayout({
       <head>
         <meta name="author" content="Shahroz" />
       </head>
-      <body>
+      <body suppressHydrationWarning>
         <Providers>{children}</Providers>
       </body>
     </html>
