@@ -228,7 +228,7 @@ export default function ActivityPage() {
       </div>
 
       {/* Search and Filters */}
-      <div className="flex flex-col gap-4 sticky top-14 z-30 py-3 -mx-2 px-2 bg-background/80 backdrop-blur-md rounded-xl">
+      <div className="flex flex-col gap-4 mb-2">
         <div className="relative">
           <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <Input 
