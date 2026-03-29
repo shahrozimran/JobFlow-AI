@@ -2,28 +2,16 @@
 
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { cn } from "@/lib/utils";
 import AppSidebar from "@/components/layout/AppSidebar";
 import TopBar from "@/components/layout/TopBar";
 import { isProfileComplete } from "@/lib/profile-store";
+import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
 
 export default function DashboardShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
   const isOnboarding = pathname === "/dashboard/onboarding";
   const [checked, setChecked] = useState(false);
-  const [collapsed, setCollapsed] = useState(false);
-
-  useEffect(() => {
-    const handleResize = () => {
-      if (window.innerWidth < 768) {
-        setCollapsed(true);
-      }
-    };
-    handleResize();
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  }, []);
 
   useEffect(() => {
     async function checkProfile() {
@@ -55,17 +43,14 @@ export default function DashboardShell({ children }: { children: React.ReactNode
   }
 
   return (
-    <div className="min-h-screen bg-background overflow-hidden flex">
-      <AppSidebar collapsed={collapsed} setCollapsed={setCollapsed} />
-      <div 
-        className={cn(
-          "flex-1 flex flex-col transition-all duration-300 h-screen overflow-hidden",
-          collapsed ? "ml-[72px]" : "ml-[252px]"
-        )}
-      >
-        <TopBar />
-        <main className="flex-1 overflow-y-auto">{children}</main>
+    <SidebarProvider>
+      <div className="min-h-screen bg-background flex w-full overflow-hidden">
+        <AppSidebar />
+        <SidebarInset className="flex flex-col flex-1 min-h-screen overflow-hidden">
+          <TopBar />
+          <main className="flex-1 overflow-y-auto">{children}</main>
+        </SidebarInset>
       </div>
-    </div>
+    </SidebarProvider>
   );
 }

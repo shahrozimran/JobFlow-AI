@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   FileText,
@@ -21,9 +21,11 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
-import { getProfile } from "@/lib/profile-store";
+import { getProfile, defaultProfile, UserProfile } from "@/lib/profile-store";
 import { saveResume, generateResumeId } from "@/lib/resume-store";
 import { cn } from "@/lib/utils";
+import { jsPDF } from "jspdf";
+import html2canvas from "html2canvas";
 
 type OptType = "ats" | "creative" | null;
 type Step = 1 | 2 | 3 | 4;
@@ -66,8 +68,14 @@ export default function ResumeWorkspacePage() {
   const [generatedContent, setGeneratedContent] = useState("");
   const [atsScore, setAtsScore] = useState<number | null>(null);
   const [generatingStep, setGeneratingStep] = useState(0);
+  const [profile, setProfile] = useState<UserProfile>(defaultProfile);
+  const [isExporting, setIsExporting] = useState(false);
+  
+  const resumeRef = useRef<HTMLDivElement>(null);
 
-  const profile = getProfile();
+  useEffect(() => {
+    getProfile().then(setProfile);
+  }, []);
 
   const generatingSteps = [
     "Analyzing job description…",
@@ -86,38 +94,59 @@ export default function ResumeWorkspacePage() {
     setStep(3);
     setGeneratingStep(0);
 
-    for (let i = 0; i < generatingSteps.length; i++) {
-      setGeneratingStep(i);
-      await new Promise((r) => setTimeout(r, 800));
+    // Initial loading animation
+    const loadingInterval = setInterval(() => {
+      setGeneratingStep((prev) => (prev < 4 ? prev + 1 : prev));
+    }, 1200);
+
+    try {
+      const response = await fetch("/api/ats/generate-resume", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          jd: jobDescription,
+          targetRole,
+          company,
+          optimizationType,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to generate resume through ATS pipeline.");
+      }
+
+      const data = await response.json();
+      
+      clearInterval(loadingInterval);
+      setGeneratingStep(4);
+      // Wait a moment for UX
+      await new Promise((r) => setTimeout(r, 1000));
+
+      setGeneratedContent(data.generatedContent);
+      setAtsScore(data.atsScore);
+
+      saveResume({
+        id: generateResumeId(),
+        targetRole,
+        company,
+        jobDescription,
+        optimizationType: optimizationType!,
+        atsScore: data.atsScore,
+        status: "active",
+        templateId: selectedTemplate,
+        generatedContent: data.generatedContent,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      });
+
+      setStep(4);
+    } catch (error: any) {
+      clearInterval(loadingInterval);
+      setStep(1);
+      toast.error(error.message || "An error occurred while generating your resume.");
     }
-
-    const mockContent = generateMockResume(
-      profile,
-      targetRole,
-      company,
-      optimizationType!
-    );
-    const mockScore =
-      optimizationType === "ats" ? Math.floor(Math.random() * 15) + 82 : null;
-
-    setGeneratedContent(mockContent);
-    setAtsScore(mockScore);
-
-    saveResume({
-      id: generateResumeId(),
-      targetRole,
-      company,
-      jobDescription,
-      optimizationType: optimizationType!,
-      atsScore: mockScore,
-      status: "active",
-      templateId: selectedTemplate,
-      generatedContent: mockContent,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    });
-
-    setStep(4);
   };
 
   const handleReset = () => {
@@ -135,6 +164,46 @@ export default function ResumeWorkspacePage() {
   const handleCopy = () => {
     navigator.clipboard.writeText(generatedContent);
     toast.success("Resume content copied to clipboard");
+  };
+
+  const handleExportPDF = async () => {
+    if (!resumeRef.current) return;
+    
+    setIsExporting(true);
+    const toastId = toast.loading("Generating your high-end PDF...");
+
+    try {
+      // Ensure the DOM is fully settled before capturing
+      await new Promise((resolve) => window.requestAnimationFrame(resolve));
+
+      const element = resumeRef.current;
+      const canvas = await html2canvas(element, {
+        scale: 2,
+        useCORS: true,
+        logging: false,
+        backgroundColor: "#ffffff",
+      });
+      
+      const imgData = canvas.toDataURL("image/png");
+      const pdf = new jsPDF({
+        orientation: "portrait",
+        unit: "mm",
+        format: "a4",
+      });
+
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+
+      pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, pdfHeight);
+      pdf.save(`JobFlow_Resume_${targetRole.replace(/\s+/g, "_")}.pdf`);
+      
+      toast.success("Resume exported successfully!", { id: toastId });
+    } catch (error) {
+      console.error("PDF Export error:", error);
+      toast.error(`Export failed: ${(error as Error).message}`, { id: toastId });
+    } finally {
+      setIsExporting(false);
+    }
   };
 
   return (
@@ -158,8 +227,13 @@ export default function ResumeWorkspacePage() {
             >
               <RotateCcw className="w-3.5 h-3.5" /> New Resume
             </Button>
-            <Button className="gap-2 rounded-xl text-sm shadow-sm">
-              <Download className="w-3.5 h-3.5" /> Export PDF
+            <Button 
+              className="gap-2 rounded-xl text-sm shadow-sm"
+              onClick={handleExportPDF}
+              disabled={isExporting}
+            >
+              <Download className={cn("w-3.5 h-3.5", isExporting && "animate-bounce")} /> 
+              {isExporting ? "Exporting..." : "Export PDF"}
             </Button>
           </div>
         )}
@@ -604,7 +678,10 @@ export default function ResumeWorkspacePage() {
             </div>
 
             {/* Resume Document */}
-            <div className="rounded-xl border border-border/40 bg-card shadow-sm overflow-hidden">
+            <div 
+              ref={resumeRef}
+              className="rounded-xl border border-border/40 bg-card shadow-sm overflow-hidden"
+            >
               <div className="p-8 md:p-12">
                 <div
                   className="whitespace-pre-wrap text-sm leading-relaxed text-foreground font-[system-ui]"
@@ -688,96 +765,4 @@ function TemplatePreview({ type }: { type: string }) {
       <rect x="10" y="107" width="85" height="2" rx="1" fill="currentColor" opacity="0.08" />
     </svg>
   );
-}
-
-/* ─── Mock Resume Generator ─── */
-function generateMockResume(
-  profile: ReturnType<typeof getProfile>,
-  targetRole: string,
-  company: string,
-  type: "ats" | "creative"
-): string {
-  const name =
-    profile.firstName && profile.lastName
-      ? `${profile.firstName} ${profile.lastName}`
-      : "John Doe";
-  const email = profile.email || "john@example.com";
-  const phone = profile.phone || "(555) 123-4567";
-  const location = profile.location || "San Francisco, CA";
-  const summary =
-    profile.summary ||
-    `Results-driven professional with extensive experience in software development and a proven track record of delivering high-impact solutions.`;
-
-  const skills =
-    profile.skills.length > 0
-      ? profile.skills.join(" • ")
-      : "React • TypeScript • Node.js • Python • AWS • Docker • CI/CD • REST APIs";
-
-  const experienceBlock =
-    profile.experience.length > 0
-      ? profile.experience
-          .map(
-            (exp) =>
-              `${exp.title || "Software Engineer"} | ${exp.company || "Tech Company"}\n${exp.startDate || "2022"} - ${exp.endDate || "Present"}\n${exp.bullets
-                .filter((b) => b.trim())
-                .map((b) => `• ${b}`)
-                .join("\n")}`
-          )
-          .join("\n\n")
-      : `Senior Software Engineer | TechCorp Inc.\n2022 - Present\n• Led the development of a React-based dashboard serving 50K+ daily active users\n• Implemented CI/CD pipelines reducing deployment time by 60%\n• Mentored 4 junior developers and conducted technical interviews\n\nSoftware Engineer | StartupXYZ\n2020 - 2022\n• Built RESTful APIs using Node.js and Express serving 100K+ requests/day\n• Optimized database queries achieving 40% improvement in response times\n• Collaborated with product team to deliver 3 major feature releases`;
-
-  const educationBlock =
-    profile.education.length > 0
-      ? profile.education
-          .map(
-            (edu) =>
-              `${edu.degree || "B.S. Computer Science"} | ${edu.institution || "University"}`
-          )
-          .join("\n")
-      : `B.S. Computer Science | Stanford University`;
-
-  if (type === "ats") {
-    return `${name.toUpperCase()}
-${email} | ${phone} | ${location}
-${profile.linkedinUrl || "linkedin.com/in/profile"}
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-PROFESSIONAL SUMMARY
-${summary}
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-SKILLS
-${skills}
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-PROFESSIONAL EXPERIENCE
-${experienceBlock}
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-EDUCATION
-${educationBlock}`;
-  }
-
-  return `╔══════════════════════════════════════╗
-║  ${name.toUpperCase()}
-║  ${targetRole}${company ? ` | ${company}` : ""}
-╚══════════════════════════════════════╝
-
-📧 ${email}  📞 ${phone}  📍 ${location}
-
-─── About Me ───────────────────────
-${summary}
-
-─── Technical Skills ───────────────
-${skills}
-
-─── Experience ─────────────────────
-${experienceBlock}
-
-─── Education ──────────────────────
-${educationBlock}`;
 }

@@ -15,6 +15,7 @@ import {
   Trash2,
   ChevronRight,
 } from "lucide-react";
+import { Separator } from "@/components/ui/separator";
 import { ThemeToggle } from "../ThemeToggle";
 import {
   DropdownMenu,
@@ -27,6 +28,7 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { SidebarTrigger } from "@/components/ui/sidebar";
 
 const initialNotifications = [
   {
@@ -119,29 +121,34 @@ export default function TopBar() {
   }
 
   return (
-    <header className="sticky top-0 z-40 h-14 border-b border-border/40 bg-card/80 backdrop-blur-xl flex items-center justify-between px-6">
-      {/* Breadcrumbs */}
-      <nav className="flex items-center gap-1.5 text-sm" aria-label="Breadcrumb">
-        {breadcrumbs.map((crumb, i) => (
-          <div key={crumb.href} className="flex items-center gap-1.5">
-            {i > 0 && (
-              <ChevronRight className="w-3.5 h-3.5 text-muted-foreground/50" />
-            )}
-            {i === breadcrumbs.length - 1 ? (
-              <span className="font-semibold text-foreground">
-                {crumb.label}
-              </span>
-            ) : (
-              <Link
-                href={crumb.href}
-                className="text-muted-foreground hover:text-foreground transition-colors"
-              >
-                {crumb.label}
-              </Link>
-            )}
-          </div>
-        ))}
-      </nav>
+    <header className="sticky top-0 z-40 h-14 border-b border-border/40 bg-card/80 backdrop-blur-xl flex items-center justify-between px-4">
+      <div className="flex items-center gap-4">
+        <SidebarTrigger className="-ml-1" />
+        <Separator orientation="vertical" className="mr-2 h-4 hidden md:block" />
+        
+        {/* Breadcrumbs */}
+        <nav className="flex items-center gap-1.5 text-sm" aria-label="Breadcrumb">
+          {breadcrumbs.map((crumb, i) => (
+            <div key={crumb.href} className="flex items-center gap-1.5">
+              {i > 0 && (
+                <ChevronRight className="w-3.5 h-3.5 text-muted-foreground/50" />
+              )}
+              {i === breadcrumbs.length - 1 ? (
+                <span className="font-semibold text-foreground">
+                  {crumb.label}
+                </span>
+              ) : (
+                <Link
+                  href={crumb.href}
+                  className="text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  {crumb.label}
+                </Link>
+              )}
+            </div>
+          ))}
+        </nav>
+      </div>
 
       <div className="flex items-center gap-2">
         {/* Search */}
