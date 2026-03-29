@@ -24,8 +24,9 @@ import { toast } from "sonner";
 import { getProfile, defaultProfile, UserProfile } from "@/lib/profile-store";
 import { saveResume, generateResumeId } from "@/lib/resume-store";
 import { cn } from "@/lib/utils";
-import { jsPDF } from "jspdf";
-import html2canvas from "html2canvas";
+import { pdf } from "@react-pdf/renderer";
+import { AtsTemplate } from "@/components/resume-templates/AtsTemplate";
+import { AtsPdfTemplate } from "@/components/resume-templates/AtsPdfTemplate";
 
 type OptType = "ats" | "creative" | null;
 type Step = 1 | 2 | 3 | 4;
@@ -167,35 +168,28 @@ export default function ResumeWorkspacePage() {
   };
 
   const handleExportPDF = async () => {
-    if (!resumeRef.current) return;
-    
     setIsExporting(true);
     const toastId = toast.loading("Generating your high-end PDF...");
 
     try {
-      // Ensure the DOM is fully settled before capturing
-      await new Promise((resolve) => window.requestAnimationFrame(resolve));
+      let data = null;
+      try {
+        data = JSON.parse(generatedContent);
+      } catch (e) {
+        throw new Error("Cannot export raw text to PDF. Missing structured data.");
+      }
 
-      const element = resumeRef.current;
-      const canvas = await html2canvas(element, {
-        scale: 2,
-        useCORS: true,
-        logging: false,
-        backgroundColor: "#ffffff",
-      });
+      // Generate actual vector PDF natively
+      const blob = await pdf(<AtsPdfTemplate data={data} />).toBlob();
+      const url = URL.createObjectURL(blob);
       
-      const imgData = canvas.toDataURL("image/png");
-      const pdf = new jsPDF({
-        orientation: "portrait",
-        unit: "mm",
-        format: "a4",
-      });
-
-      const pdfWidth = pdf.internal.pageSize.getWidth();
-      const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
-
-      pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, pdfHeight);
-      pdf.save(`JobFlow_Resume_${targetRole.replace(/\s+/g, "_")}.pdf`);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `JobFlow_Resume_${targetRole.replace(/\s+/g, "_")}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
       
       toast.success("Resume exported successfully!", { id: toastId });
     } catch (error) {
@@ -683,12 +677,7 @@ export default function ResumeWorkspacePage() {
               className="rounded-xl border border-border/40 bg-card shadow-sm overflow-hidden"
             >
               <div className="p-8 md:p-12">
-                <div
-                  className="whitespace-pre-wrap text-sm leading-relaxed text-foreground font-[system-ui]"
-                  style={{ fontFamily: "'Inter', system-ui, sans-serif" }}
-                >
-                  {generatedContent}
-                </div>
+                 <AtsTemplate content={generatedContent} />
               </div>
             </div>
           </motion.div>
