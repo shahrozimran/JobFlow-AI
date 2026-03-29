@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { PutObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
-import { r2Client } from "@/lib/r2";
+import { getR2Client } from "@/lib/r2";
 import { createClient } from "@/lib/supabase/server";
 
 const ALLOWED_MIME_TYPES = [
@@ -64,7 +64,7 @@ export async function POST(req: Request) {
     });
 
     // Generate signed URL valid for 5 minutes (300 seconds)
-    const presignedUrl = await getSignedUrl(r2Client, command, {
+    const presignedUrl = await getSignedUrl(getR2Client(), command, {
       expiresIn: 300,
     });
 

@@ -69,6 +69,7 @@ export default function OnboardingPage() {
         await saveProfile(profile);
         setCurrentStep(currentStep + 1);
       } catch (error) {
+        console.error("Onboarding save error:", error);
         toast.error("Failed to save profile. Please try again.");
       } finally {
         setIsSaving(false);

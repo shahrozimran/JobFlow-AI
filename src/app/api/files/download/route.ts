@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { GetObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
-import { r2Client } from "@/lib/r2";
+import { getR2Client } from "@/lib/r2";
 import { createClient } from "@/lib/supabase/server";
 
 export async function GET(req: Request) {
@@ -48,7 +48,7 @@ export async function GET(req: Request) {
     });
 
     // Generate signed URL valid for 1 hour
-    const presignedUrl = await getSignedUrl(r2Client, command, {
+    const presignedUrl = await getSignedUrl(getR2Client(), command, {
       expiresIn: 3600,
     });
 

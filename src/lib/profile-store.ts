@@ -129,29 +129,33 @@ export async function saveProfile(profile: Partial<UserProfile>): Promise<UserPr
     const currentProfile = await getProfile();
     const newProfile = { ...currentProfile, ...profile };
 
+    const dbPayload = {
+      id: user.id,
+      full_name: `${newProfile.firstName} ${newProfile.lastName}`.trim(),
+      first_name: newProfile.firstName,
+      last_name: newProfile.lastName,
+      email: newProfile.email,
+      phone: newProfile.phone,
+      location: newProfile.location,
+      linkedin_url: newProfile.linkedinUrl,
+      portfolio_url: newProfile.portfolioUrl,
+      summary: newProfile.summary,
+      experience: newProfile.experience,
+      education: newProfile.education,
+      skills: newProfile.skills,
+      certifications: newProfile.certifications,
+      projects: newProfile.projects,
+      completed_onboarding: newProfile.completedOnboarding,
+      updated_at: new Date().toISOString(),
+    };
+
+    // Use upsert to handle both existing and missing profile rows
     const { error } = await supabase
       .from('profiles')
-      .update({
-        first_name: newProfile.firstName,
-        last_name: newProfile.lastName,
-        email: newProfile.email,
-        phone: newProfile.phone,
-        location: newProfile.location,
-        linkedin_url: newProfile.linkedinUrl,
-        portfolio_url: newProfile.portfolioUrl,
-        summary: newProfile.summary,
-        experience: newProfile.experience,
-        education: newProfile.education,
-        skills: newProfile.skills,
-        certifications: newProfile.certifications,
-        projects: newProfile.projects,
-        completed_onboarding: newProfile.completedOnboarding,
-        updated_at: new Date().toISOString(),
-      })
-      .eq('id', user.id);
+      .upsert(dbPayload, { onConflict: 'id' });
 
     if (error) {
-      console.error("Supabase update error:", error);
+      console.error("Supabase upsert error:", error);
       throw error;
     }
     
