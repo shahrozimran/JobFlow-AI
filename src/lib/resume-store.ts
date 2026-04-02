@@ -64,7 +64,7 @@ function mapDbToFrontend(row: DbResume): GeneratedResume {
  */
 export async function getResumes(): Promise<GeneratedResume[]> {
   try {
-    const res = await fetch("/api/resumes", { credentials: "include" });
+    const res = await fetch("/api/resumes?lite=true", { credentials: "include" });
     if (!res.ok) return [];
     const data: DbResume[] = await res.json();
     return data.map(mapDbToFrontend);

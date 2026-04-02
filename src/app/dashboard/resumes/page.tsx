@@ -23,13 +23,12 @@ import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import {
   getResumes,
+  getResumeById,
   deleteResume,
   getResumeStatsFromList,
   GeneratedResume,
 } from "@/lib/resume-store";
-import { pdf } from "@react-pdf/renderer";
-import { AtsPdfTemplate } from "@/components/resume-templates/AtsPdfTemplate";
-import { ModernSplitPdfTemplate } from "@/components/resume-templates/ModernSplitPdfTemplate";
+
 
 export default function MyResumesPage() {
   const router = useRouter();
@@ -74,18 +73,27 @@ export default function MyResumesPage() {
   };
 
   const handleExport = async (resume: GeneratedResume) => {
-    if (!resume.generatedContent) {
-      toast.error("No content to export");
-      return;
-    }
     setExportingId(resume.id);
     try {
-      const data = JSON.parse(resume.generatedContent);
+      let content = resume.generatedContent;
+      if (!content) {
+        const fullResume = await getResumeById(resume.id);
+        if (!fullResume || !fullResume.generatedContent) {
+          throw new Error("No content payload found");
+        }
+        content = fullResume.generatedContent;
+      }
+
+      const data = JSON.parse(content);
+      const { pdf } = await import("@react-pdf/renderer");
+      const { AtsPdfTemplate } = await import("@/components/resume-templates/AtsPdfTemplate");
+      
       let pdfComponent = <AtsPdfTemplate data={data} />;
       if (
         resume.optimizationType === "creative" &&
         resume.templateId === "modern-split"
       ) {
+        const { ModernSplitPdfTemplate } = await import("@/components/resume-templates/ModernSplitPdfTemplate");
         pdfComponent = <ModernSplitPdfTemplate data={data} />;
       }
       const blob = await pdf(pdfComponent).toBlob();

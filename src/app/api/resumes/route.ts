@@ -12,9 +12,17 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
+    const url = new URL(req.url);
+    const isLite = url.searchParams.get("lite") === "true";
+
+    // Omit massive text columns (job_description, generated_content) for lightweight dashboard renders
+    const selectStr = isLite 
+      ? "id, user_id, target_role, company, optimization_type, ats_score, status, template_id, created_at, updated_at"
+      : "*";
+
     const { data, error } = await supabase
       .from("user_resumes")
-      .select("*")
+      .select(selectStr)
       .eq("user_id", user.id)
       .order("created_at", { ascending: false });
 
