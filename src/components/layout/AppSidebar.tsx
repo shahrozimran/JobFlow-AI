@@ -10,7 +10,7 @@ import {
   History,
   User,
   LogOut,
-  Hexagon,
+  Zap,
 } from "lucide-react";
 import {
   Sidebar,
@@ -52,8 +52,8 @@ export default function AppSidebar() {
       {/* Logo Section */}
       <SidebarHeader className="h-16 flex items-center px-4 pt-2">
         <div className="flex items-center gap-3 w-full">
-          <div className="w-8 h-8 rounded-lg bg-foreground flex items-center justify-center shrink-0">
-            <Hexagon className="w-5 h-5 text-background fill-background" />
+          <div className="w-8 h-8 rounded-lg gradient-premium text-white flex items-center justify-center shrink-0 shadow-md">
+            <Zap className="w-4 h-4" fill="currentColor" />
           </div>
           {state !== "collapsed" && (
             <span className="text-foreground font-semibold text-lg tracking-tight whitespace-nowrap">
