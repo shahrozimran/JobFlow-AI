@@ -168,7 +168,8 @@ Respond in this exact JSON format:
   "description": "The FULL job description text including responsibilities and requirements — keep it complete and detailed, do not summarize",
   "salary": "Salary range if mentioned, otherwise null",
   "requirements": ["requirement1", "requirement2", "..."],
-  "applyUrl": "Direct application URL if found, otherwise null"
+  "applyUrl": "Direct application URL if found, otherwise null",
+  "contactEmail": "Extract any HR, recruiting, or founder email address mentioned for applying. Return null if none is explicitly mentioned."
 }`,
         },
       ],
