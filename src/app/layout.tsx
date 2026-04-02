@@ -7,12 +7,12 @@ export const metadata = {
   openGraph: {
     title: "JobFlow AI",
     description: "Optimize your career with JobFlow AI. Create ATS-friendly resumes, automate your job search, and get personalized career outreach — all powered by advanced AI.",
-    images: ["https://lovable.dev/opengraph-image-p98pqg.png"],
+    images: ["/og-image.png"],
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
-    images: ["https://lovable.dev/opengraph-image-p98pqg.png"],
+    images: ["/og-image.png"],
   },
 };
 

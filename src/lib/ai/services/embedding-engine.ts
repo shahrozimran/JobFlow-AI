@@ -40,6 +40,10 @@ export function cosineSimilarity(vecA: number[], vecB: number[]): number {
  * Orchestrates Step 2 to compute similarity score.
  */
 export async function computeSimilarity(jdText: string, resumeText: string): Promise<number> {
+  if (process.env.OPENAI_API_KEY === "dummy" || !process.env.OPENAI_API_KEY) {
+    return 0.85; // Default mock similarity for local testing
+  }
+
   const [jdEmbedding, resumeEmbedding] = await Promise.all([
     getEmbedding(jdText),
     getEmbedding(resumeText),

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { motion } from "framer-motion";
 import Link from "next/link";
 import {
@@ -13,10 +13,11 @@ import {
   MoreHorizontal,
   Zap,
   Clock,
+  CheckCircle2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { getProfile, getProfileCompleteness } from "@/lib/profile-store";
-import { getResumes, getResumeStats } from "@/lib/resume-store";
+import { getResumes, getResumeStatsFromList } from "@/lib/resume-store";
 import type { GeneratedResume } from "@/lib/resume-store";
 import {
   LineChart,
@@ -30,23 +31,7 @@ import {
   Bar,
 } from "recharts";
 
-// Sample chart data
-const weeklyData = [
-  { day: "Mon", resumes: 2 },
-  { day: "Tue", resumes: 1 },
-  { day: "Wed", resumes: 3 },
-  { day: "Thu", resumes: 0 },
-  { day: "Fri", resumes: 4 },
-  { day: "Sat", resumes: 2 },
-  { day: "Sun", resumes: 1 },
-];
 
-const scoreDistribution = [
-  { range: "60-69", count: 1 },
-  { range: "70-79", count: 3 },
-  { range: "80-89", count: 5 },
-  { range: "90-100", count: 4 },
-];
 
 export default function Dashboard() {
   const [profile, setProfile] = useState({ firstName: "", lastName: "" });
@@ -61,13 +46,67 @@ export default function Dashboard() {
     completedResumes: 0,
   });
 
+  const weeklyData = useMemo(() => {
+    const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+    const data: { day: string; resumes: number; date: string }[] = [];
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    for (let i = 6; i >= 0; i--) {
+      const d = new Date(today);
+      d.setDate(d.getDate() - i);
+      data.push({
+        day: days[d.getDay()],
+        resumes: 0,
+        date: d.toDateString(),
+      });
+    }
+
+    resumes.forEach((r) => {
+      const rd = new Date(r.createdAt);
+      rd.setHours(0, 0, 0, 0);
+      const target = data.find((item) => item.date === rd.toDateString());
+      if (target) {
+        target.resumes += 1;
+      }
+    });
+
+    return data.map(({ day, resumes }) => ({ day, resumes })); // Strip date for chart
+  }, [resumes]);
+
+  const scoreDistribution = useMemo(() => {
+    const bins = {
+      "60-69": 0,
+      "70-79": 0,
+      "80-89": 0,
+      "90-100": 0,
+    };
+
+    resumes.forEach((r) => {
+      if (r.atsScore !== null && r.atsScore >= 60) {
+        if (r.atsScore < 70) bins["60-69"] += 1;
+        else if (r.atsScore < 80) bins["70-79"] += 1;
+        else if (r.atsScore < 90) bins["80-89"] += 1;
+        else bins["90-100"] += 1;
+      }
+    });
+
+    return [
+      { range: "60-69", count: bins["60-69"] },
+      { range: "70-79", count: bins["70-79"] },
+      { range: "80-89", count: bins["80-89"] },
+      { range: "90-100", count: bins["90-100"] },
+    ];
+  }, [resumes]);
+
   useEffect(() => {
     async function loadData() {
       const p = await getProfile();
       setProfile({ firstName: p.firstName, lastName: p.lastName });
       setCompleteness(await getProfileCompleteness());
-      setResumes(getResumes());
-      setStats(getResumeStats());
+      const fetchedResumes = await getResumes();
+      setResumes(fetchedResumes);
+      setStats(getResumeStatsFromList(fetchedResumes));
     }
     loadData();
   }, []);
@@ -307,7 +346,7 @@ export default function Dashboard() {
             Recent Resumes
           </h3>
           <Link
-            href="/dashboard/resume-workspace"
+            href="/dashboard/resumes"
             className="text-xs font-medium text-primary hover:underline"
           >
             View all
@@ -427,68 +466,5 @@ export default function Dashboard() {
         )}
       </div>
     </div>
-  );
-}
-
-function StatCard({ title, value, trend, icon: Icon, color, bg, border }: any) {
-  return (
-    <motion.div 
-      initial={{ opacity: 0, scale: 0.95 }}
-      animate={{ opacity: 1, scale: 1 }}
-      className="bg-background/80 backdrop-blur-xl border border-border/50 p-6 rounded-3xl shadow-sm hover:shadow-md transition-shadow"
-    >
-      <div className="flex items-center justify-between mb-4">
-        <div className={`w-12 h-12 rounded-2xl ${bg} ${color} flex items-center justify-center border ${border}`}>
-          <Icon className="w-6 h-6" />
-        </div>
-        <span className="text-xs font-bold text-success bg-success/10 border border-success/20 px-2 py-1 rounded-full">{trend}</span>
-      </div>
-      <div>
-        <p className="text-sm font-semibold text-muted-foreground mb-1">{title}</p>
-        <p className="text-3xl font-black tracking-tight text-foreground">{value}</p>
-      </div>
-    </motion.div>
-  );
-}
-
-function StatusBadge({ status }: { status: string }) {
-  if (status === "Active") {
-    return (
-      <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-blue-500/10 text-blue-500 border border-blue-500/20">
-        <span className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse" /> Active
-      </span>
-    );
-  }
-  if (status === "Draft") {
-    return (
-      <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-muted text-muted-foreground border border-border/50">
-        <Clock className="w-3 h-3" /> Draft
-      </span>
-    );
-  }
-  return (
-    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-success/10 text-success border border-success/20">
-      <CheckCircle2 className="w-3 h-3" /> Complete
-    </span>
-  );
-}
-
-function UserIcon(props: any) {
-  return (
-    <svg
-      {...props}
-      xmlns="http://www.w3.org/2000/svg"
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" />
-      <circle cx="12" cy="7" r="4" />
-    </svg>
   );
 }

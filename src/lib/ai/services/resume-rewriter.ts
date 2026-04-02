@@ -82,6 +82,45 @@ const prompt = `
   `;
 
   try {
+    if (process.env.OPENAI_API_KEY === "dummy" || !process.env.OPENAI_API_KEY) {
+      console.log("Using dummy OPENAI_API_KEY, returning mock resume JSON.");
+      // Simulate API delay
+      await new Promise((resolve) => setTimeout(resolve, 2000));
+      return JSON.stringify({
+        personalInfo: {
+          name: userProfile.first_name ? `${userProfile.first_name} ${userProfile.last_name || ""}`.trim() : "Demo User",
+          email: userProfile.email || "demo@example.com",
+          phone: userProfile.phone || "555-0100",
+          location: userProfile.location || "San Francisco, CA",
+          linkedin: userProfile.linkedin_url || "linkedin.com/in/demo",
+          github: userProfile.portfolio_url || "github.com/demo"
+        },
+        summary: `Result-driven professional with expertise targeting the key responsibilities of the role. Proven ability to leverage ${optimizedKeywords.skills[0] || "industry skills"} to deliver robust solutions. Adept at driving impact in fast-paced environments.`,
+        experience: [
+          {
+            title: "Senior Role",
+            company: "Tech Corp",
+            location: "Remote",
+            dates: "2020 – Present",
+            bullets: [
+              `Spearheaded major initiatives utilizing ${optimizedKeywords.skills[1] || "key tools"} to achieve a 30% increase in efficiency.`,
+              `Collaborated cross-functionally to implement ${optimizedKeywords.experience[0] || "best practices"}.`
+            ]
+          }
+        ],
+        education: [
+          {
+            degree: "B.S. Computer Science",
+            school: "State University",
+            location: "Anytown",
+            dates: "2016 – 2020"
+          }
+        ],
+        skills: optimizedKeywords.skills.length > 0 ? optimizedKeywords.skills : ["JavaScript", "React", "Node.js", "System Design"],
+        certifications: ["AWS Certified Developer"]
+      });
+    }
+
     const response = await openai.chat.completions.create({
       model: "gpt-4o",
       response_format: { type: "json_object" },

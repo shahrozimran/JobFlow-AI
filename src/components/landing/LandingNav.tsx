@@ -61,13 +61,13 @@ export default function LandingNav() {
         <div className="hidden md:flex items-center gap-3">
           <ThemeToggle />
           <Link
-            href="/dashboard"
+            href="/login"
             className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors px-3 py-2"
           >
             Log In
           </Link>
           <Link
-            href="/dashboard"
+            href="/signup"
             className="px-5 py-2 rounded-full bg-foreground text-background text-sm font-semibold hover:opacity-90 transition-all shadow-md hover:shadow-lg hover:shadow-foreground/10 active:scale-95"
           >
             Get Started
@@ -109,14 +109,14 @@ export default function LandingNav() {
               ))}
               <div className="h-px bg-border/50 my-2 mx-4" />
               <Link
-                href="/dashboard"
+                href="/login"
                 onClick={() => setIsOpen(false)}
                 className="text-base font-medium text-muted-foreground hover:text-foreground transition-colors px-4 py-3 rounded-xl"
               >
                 Log In
               </Link>
               <Link
-                href="/dashboard"
+                href="/signup"
                 onClick={() => setIsOpen(false)}
                 className="mt-2 text-center py-3 mx-4 rounded-full bg-foreground text-background font-semibold hover:opacity-90 transition-all shadow-md hover:shadow-lg"
               >

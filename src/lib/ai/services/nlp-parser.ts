@@ -41,6 +41,22 @@ export async function parseJobDescription(jdText: string): Promise<JDParsedData>
   `;
 
   try {
+    if (process.env.OPENAI_API_KEY === "dummy" || !process.env.OPENAI_API_KEY) {
+      console.log("Using dummy OPENAI_API_KEY, returning mock JD parsed data.");
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+      return {
+        skills: ["React", "TypeScript", "Node.js", "System Architecture", "Agile"],
+        tools: ["Git", "Docker", "AWS", "Jira"],
+        experienceLevel: "Senior",
+        responsibilities: [
+          "Lead frontend architecture and development.",
+          "Mentor junior engineers.",
+          "Optimize application performance."
+        ],
+        topKeywords: ["React", "TypeScript", "Node.js", "System Architecture", "Performance Optimization", "AWS", "Docker", "Mentoring"]
+      };
+    }
+
     const response = await openai.chat.completions.create({
       model: "gpt-4o-mini",
       messages: [{ role: "user", content: prompt }],

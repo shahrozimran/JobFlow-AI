@@ -129,8 +129,9 @@ export default function ResumeWorkspacePage() {
       setGeneratedContent(data.generatedContent);
       setAtsScore(data.atsScore);
 
-      saveResume({
-        id: generateResumeId(),
+      const newId = generateResumeId();
+      await saveResume({
+        id: newId,
         targetRole,
         company,
         jobDescription,

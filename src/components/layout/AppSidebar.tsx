@@ -11,6 +11,7 @@ import {
   User,
   LogOut,
   Zap,
+  FolderOpen,
 } from "lucide-react";
 import {
   Sidebar,
@@ -29,6 +30,7 @@ import { cn } from "@/lib/utils";
 const mainNav = [
   { path: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { path: "/dashboard/profile", label: "My Profile", icon: User },
+  { path: "/dashboard/resumes", label: "My Resumes", icon: FolderOpen },
   { path: "/dashboard/resume-workspace", label: "Resume AI", icon: FileText },
   { path: "/dashboard/outreach", label: "Outreach", icon: Mail },
   { path: "/dashboard/activity", label: "Activity", icon: History },
