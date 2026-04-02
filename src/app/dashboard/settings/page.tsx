@@ -17,6 +17,7 @@ import {
   Eye,
   EyeOff,
   AlertTriangle,
+  Loader2,
 } from "lucide-react";
 import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
@@ -204,10 +205,10 @@ export default function SettingsPage() {
                 <Button
                   onClick={handleSaveProfile}
                   disabled={isSaving}
-                  className="gap-2 px-6 rounded-xl"
+                  className="gap-2 px-6 rounded-xl w-[160px]"
                 >
                   {isSaving ? (
-                    <span className="w-4 h-4 border-2 border-background/30 border-t-background rounded-full animate-spin" />
+                    <Loader2 className="w-4 h-4 animate-spin" />
                   ) : (
                     <Save className="w-4 h-4" />
                   )}
@@ -348,10 +349,10 @@ export default function SettingsPage() {
                 <Button
                   onClick={handleUpdatePassword}
                   disabled={isUpdatingPassword || !newPassword || newPassword !== confirmPassword}
-                  className="gap-2 px-6 rounded-xl"
+                  className="gap-2 px-6 rounded-xl w-[170px]"
                 >
                   {isUpdatingPassword ? (
-                    <span className="w-4 h-4 border-2 border-background/30 border-t-background rounded-full animate-spin" />
+                    <Loader2 className="w-4 h-4 animate-spin" />
                   ) : (
                     <Shield className="w-4 h-4" />
                   )}

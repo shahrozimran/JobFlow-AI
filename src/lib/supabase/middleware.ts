@@ -59,26 +59,56 @@ export async function updateSession(request: NextRequest) {
     return NextResponse.redirect(url);
   }
 
-  // Server-side Onboarding Check
+  // Server-side Onboarding Check (Optimized with Cockie Cache)
   if (user && request.nextUrl.pathname.startsWith("/dashboard")) {
-    const { data: profile } = await supabase
-      .from("profiles")
-      .select("completed_onboarding")
-      .eq("id", user.id)
-      .single();
+    const isOnboardingPage = request.nextUrl.pathname === "/dashboard/onboarding";
+    const hasOnboardedCookie = request.cookies.get("jobflow_onboarded")?.value === "true";
 
-    const isOnboarding = request.nextUrl.pathname === "/dashboard/onboarding";
+    // 1. Fast Path: Skip DB query if cached
+    if (hasOnboardedCookie) {
+      if (isOnboardingPage) {
+        const url = request.nextUrl.clone();
+        url.pathname = "/dashboard";
+        return NextResponse.redirect(url);
+      }
+    } else {
+      // 2. Slow Path: Check DB if cookie is missing
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("completed_onboarding")
+        .eq("id", user.id)
+        .single();
 
-    if (profile && !profile.completed_onboarding && !isOnboarding) {
-      const url = request.nextUrl.clone();
-      url.pathname = "/dashboard/onboarding";
-      return NextResponse.redirect(url);
-    }
+      if (profile && !profile.completed_onboarding && !isOnboardingPage) {
+        const url = request.nextUrl.clone();
+        url.pathname = "/dashboard/onboarding";
+        const redirectRes = NextResponse.redirect(url);
+        // Explicitly wipe the cookie just in case
+        redirectRes.cookies.set("jobflow_onboarded", "false", { path: "/" });
+        return redirectRes;
+      }
 
-    if (profile && profile.completed_onboarding && isOnboarding) {
-      const url = request.nextUrl.clone();
-      url.pathname = "/dashboard";
-      return NextResponse.redirect(url);
+      if (profile && profile.completed_onboarding) {
+        // Cache success in cookie to prevent future DB hits
+        supabaseResponse.cookies.set("jobflow_onboarded", "true", {
+          path: "/",
+          maxAge: 60 * 60 * 24 * 365, // 1 year cache
+          sameSite: "lax",
+          secure: process.env.NODE_ENV === "production",
+        });
+
+        if (isOnboardingPage) {
+          const url = request.nextUrl.clone();
+          url.pathname = "/dashboard";
+          const redirectRes = NextResponse.redirect(url);
+          // Apply cookie directly to redirect payload so it doesn't get lost
+          redirectRes.cookies.set("jobflow_onboarded", "true", {
+            path: "/",
+            maxAge: 60 * 60 * 24 * 365,
+          });
+          return redirectRes;
+        }
+      }
     }
   }
 

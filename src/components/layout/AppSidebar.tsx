@@ -12,6 +12,7 @@ import {
   LogOut,
   Zap,
   FolderOpen,
+  Loader2,
 } from "lucide-react";
 import {
   Sidebar,
@@ -26,6 +27,8 @@ import {
 } from "@/components/ui/sidebar";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 
 const mainNav = [
   { path: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
@@ -43,6 +46,7 @@ const bottomNav = [
 export default function AppSidebar() {
   const pathname = usePathname();
   const { state } = useSidebar();
+  const [isSigningOut, setIsSigningOut] = useState(false);
 
   const isActive = (path: string) =>
     path === "/dashboard"
@@ -138,25 +142,57 @@ export default function AppSidebar() {
               method="POST"
               onSubmit={async (e) => {
                 e.preventDefault();
-                toast.info("Signing out...");
-                const { logout } = await import("@/app/(auth)/actions");
-                await logout();
+                setIsSigningOut(true);
+                try {
+                  const { logout } = await import("@/app/(auth)/actions");
+                  await logout();
+                } catch (error) {
+                  setIsSigningOut(false);
+                  toast.error("Failed to sign out");
+                }
               }}
               className="w-full"
             >
               <SidebarMenuButton
                 tooltip="Sign Out"
                 type="submit"
+                disabled={isSigningOut}
                 className="w-full flex items-center gap-3 px-3 py-5 rounded-lg text-[14px] font-medium text-muted-foreground hover:bg-destructive hover:text-destructive-foreground transition-all duration-300 cursor-pointer group"
               >
-                <LogOut className="w-[18px] h-[18px] shrink-0 transition-colors group-hover:text-destructive-foreground" />
-                <span>Sign Out</span>
+                {isSigningOut ? (
+                  <Loader2 className="w-[18px] h-[18px] shrink-0 animate-spin" />
+                ) : (
+                  <LogOut className="w-[18px] h-[18px] shrink-0 transition-colors group-hover:text-destructive-foreground" />
+                )}
+                <span>{isSigningOut ? "Signing out..." : "Sign Out"}</span>
               </SidebarMenuButton>
             </form>
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarFooter>
       <SidebarRail />
+
+      {/* Full screen sign-out loader */}
+      <AnimatePresence>
+        {isSigningOut && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[99999] bg-background/80 backdrop-blur-sm flex flex-col items-center justify-center"
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ delay: 0.1 }}
+              className="flex flex-col items-center gap-5 bg-card p-8 rounded-2xl shadow-xl border border-border/50"
+            >
+              <Loader2 className="w-10 h-10 text-primary animate-spin" />
+              <p className="text-lg font-medium text-foreground">Signing out securely...</p>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </Sidebar>
   );
 }

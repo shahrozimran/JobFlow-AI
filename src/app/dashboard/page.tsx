@@ -108,12 +108,25 @@ export default function Dashboard() {
 
   useEffect(() => {
     async function loadData() {
-      const p = await getProfile();
+      const [p, fetchedResumes] = await Promise.all([
+        getProfile(),
+        getResumes()
+      ]);
       setProfile({ firstName: p.firstName, lastName: p.lastName });
-      setCompleteness(await getProfileCompleteness());
-      const fetchedResumes = await getResumes();
       setResumes(fetchedResumes);
       setStats(getResumeStatsFromList(fetchedResumes));
+      
+      // Calculate completeness natively using the fetched profile to save an extra query
+      let score = 0;
+      if (p.firstName && p.lastName) score++;
+      if (p.email) score++;
+      if (p.phone || p.location) score++;
+      if (p.summary && p.summary.length > 20) score++;
+      if (p.experience.length > 0) score++;
+      if (p.education.length > 0) score++;
+      if (p.skills.length >= 3) score++;
+      if (p.linkedinUrl || p.portfolioUrl) score++;
+      setCompleteness(Math.round((score / 8) * 100));
     }
     loadData();
   }, []);

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
   History, 
@@ -17,138 +17,76 @@ import {
   CreditCard,
   ArrowUpRight,
   ArrowDownRight,
-  Loader2
+  Loader2,
+  User
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
+import { getResumes } from "@/lib/resume-store";
+import { getProfile } from "@/lib/profile-store";
 
-const initialActivities = [
-  {
-    id: 1,
-    title: "Resume parsed successfully",
-    description: "Your resume 'Software_Engineer_v2.pdf' has been parsed and added to your workspace.",
-    time: "2 mins ago",
-    date: "Mar 28, 2026",
-    unread: true,
-    category: "Credits",
-    credits: -2,
-    type: "success"
-  },
-  {
-    id: 2,
-    title: "New Job Match found",
-    description: "We found a new match for your profile: 'Senior Frontend Engineer' at Vercel.",
-    time: "1 hour ago",
-    date: "Mar 28, 2026",
-    unread: true,
-    category: "Jobs",
-    type: "info"
-  },
-  {
-    id: 3,
-    title: "ATS Analysis complete",
-    description: "Your ATS score for the 'Google' application is 85%. Review details to improve.",
-    time: "5 hours ago",
-    date: "Mar 28, 2026",
-    unread: false,
-    category: "Credits",
-    credits: -2,
-    type: "success"
-  },
-  {
-    id: 4,
-    title: "Credits Topped Up",
-    description: "Successfully added 50 credits to your account via Pro Plan renewal.",
-    time: "Yesterday",
-    date: "Mar 27, 2026",
-    unread: false,
-    category: "Credits",
-    credits: 50,
-    type: "success"
-  },
-  {
-    id: 5,
-    title: "Account Security update",
-    description: "Your password was changed successfully from a recognized device.",
-    time: "Yesterday",
-    date: "Mar 27, 2026",
-    unread: false,
-    category: "Security",
-    type: "info"
-  },
-  {
-    id: 6,
-    title: "Outreach Email Sent",
-    description: "Personalized outreach email sent to Sarah Jenkins at Stripe via LinkedIn.",
-    time: "Yesterday",
-    date: "Mar 27, 2026",
-    unread: false,
-    category: "Credits",
-    credits: -1,
-    type: "success"
-  },
-  {
-    id: 7,
-    title: "Profile Viewed",
-    description: "A recruiter from Meta viewed your optimized resume profile.",
-    time: "2 days ago",
-    date: "Mar 26, 2026",
-    unread: false,
-    category: "Jobs",
-    type: "info"
-  }
-];
-
-const archivedActivities = [
-  {
-    id: 8,
-    title: "Subscription Renewed",
-    description: "Your Pro Plan has been renewed for another month.",
-    time: "3 days ago",
-    date: "Mar 25, 2026",
-    unread: false,
-    category: "Security",
-    type: "success"
-  },
-  {
-    id: 9,
-    title: "ATS Keyword Optimization",
-    description: "Revised keywords 'Cloud Architecture' and 'System Design' for enhanced visibility.",
-    time: "4 days ago",
-    date: "Mar 24, 2026",
-    unread: false,
-    category: "Resume",
-    type: "info"
-  },
-  {
-    id: 10,
-    title: "Bulk Outreach Completed",
-    description: "Outreach campaign to 5 technical recruiters completed successfully.",
-    time: "5 days ago",
-    date: "Mar 23, 2026",
-    unread: false,
-    category: "Credits",
-    credits: -5,
-    type: "success"
-  }
-];
-
-const categories = ["All", "Credits", "Resume", "Jobs", "Outreach", "Security"];
+const categories = ["All", "Resume", "Profile"];
 
 const creditStats = [
-  { label: "Remaining", value: "145", sub: "out of 200", icon: CreditCard, color: "text-primary" },
-  { label: "Used Week", value: "12", sub: "credits spent", icon: TrendingUp, color: "text-destructive" },
-  { label: "Last Top-up", value: "50", sub: "Mar 24, 2026", icon: Zap, color: "text-gold" },
+  { label: "Active Plans", value: "Pro", sub: "Unlimited Resumes", icon: Zap, color: "text-gold" },
+  { label: "Storage", value: "Cloud", sub: "Encrypted & Synced", icon: Shield, color: "text-primary" },
+  { label: "ATS Scans", value: "Unlimited", sub: "Included in plan", icon: FileText, color: "text-success" },
 ];
 
 export default function ActivityPage() {
-  const [activities, setActivities] = useState(initialActivities);
-  const [hasMore, setHasMore] = useState(true);
-  const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const [activities, setActivities] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [activeCategory, setActiveCategory] = useState("All");
+
+  useEffect(() => {
+    async function loadActivityData() {
+      setLoading(true);
+      const [resumes, profile] = await Promise.all([getResumes(), getProfile()]);
+      
+      const mappedActivities: any[] = [];
+      
+      // Map resumes to activities
+      resumes.forEach((r) => {
+        mappedActivities.push({
+          id: r.id,
+          title: `Resume Generated: ${r.targetRole}`,
+          description: `Successfully generated a ${r.optimizationType === 'ats' ? 'high-ATS' : 'visual'} optimized resume${r.company ? ` for ${r.company}` : ''}.`,
+          dateObject: new Date(r.createdAt),
+          time: new Date(r.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+          date: new Date(r.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }),
+          unread: false,
+          category: "Resume",
+          type: "success"
+        });
+      });
+
+      // Add profile interaction as an activity if it has been updated recently
+      if (profile.lastUpdated) {
+        mappedActivities.push({
+          id: "profile-update",
+          title: "Profile Data Saved",
+          description: "Your master profile configuration was saved and synchronized.",
+          dateObject: new Date(profile.lastUpdated),
+          time: new Date(profile.lastUpdated).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+          date: new Date(profile.lastUpdated).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }),
+          unread: false,
+          category: "Profile",
+          type: "info"
+        });
+      }
+
+      // Sort newest first
+      mappedActivities.sort((a, b) => b.dateObject.getTime() - a.dateObject.getTime());
+
+      setActivities(mappedActivities);
+      setLoading(false);
+    }
+    
+    loadActivityData();
+  }, []);
 
   const filteredActivities = activities.filter(activity => {
     const matchesSearch = activity.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
@@ -157,32 +95,11 @@ export default function ActivityPage() {
     return matchesSearch && matchesCategory;
   });
 
-  const handleLoadMore = async () => {
-    if (isLoadingMore) return;
-    
-    setIsLoadingMore(true);
-    
-    // Simulate API delay
-    await new Promise(resolve => setTimeout(resolve, 800));
-
-    if (hasMore && activities.length < initialActivities.length + archivedActivities.length) {
-      setActivities(prev => [...prev, ...archivedActivities]);
-      setHasMore(false);
-      toast.success("Older activities loaded successfully");
-    } else {
-      toast.info("No older activity found");
-    }
-    
-    setIsLoadingMore(false);
-  };
 
   const getIcon = (category: string) => {
     switch (category) {
       case "Resume": return <FileText className="w-4 h-4" />;
-      case "Jobs": return <Briefcase className="w-4 h-4" />;
-      case "Outreach": return <Zap className="w-4 h-4" />;
-      case "Security": return <Shield className="w-4 h-4" />;
-      case "Credits": return <CreditCard className="w-4 h-4" />;
+      case "Profile": return <User className="w-4 h-4" />;
       default: return <Clock className="w-4 h-4" />;
     }
   };
@@ -260,7 +177,12 @@ export default function ActivityPage() {
       {/* Activity Feed */}
       <div className="space-y-4">
         <AnimatePresence mode="popLayout">
-          {filteredActivities.length > 0 ? (
+          {loading ? (
+            <div className="flex flex-col items-center justify-center py-20">
+              <Loader2 className="w-8 h-8 animate-spin text-muted-foreground mb-4" />
+              <p className="text-sm text-muted-foreground">Loading activity history...</p>
+            </div>
+          ) : filteredActivities.length > 0 ? (
             filteredActivities.map((activity, index) => (
               <motion.div
                 key={activity.id}
@@ -351,24 +273,18 @@ export default function ActivityPage() {
         </AnimatePresence>
       </div>
 
-      <div className="flex flex-col items-center gap-3 pt-4">
-        <p className="text-xs text-muted-foreground">Showing {filteredActivities.length} logs</p>
-        <Button 
-          variant="ghost" 
-          onClick={handleLoadMore}
-          disabled={isLoadingMore}
-          className="text-primary font-medium hover:bg-primary/10 rounded-xl px-8 h-10"
-        >
-          {isLoadingMore ? (
-            <div className="flex items-center gap-2">
-              <Loader2 className="w-5 h-5 animate-spin" />
-              Searching...
-            </div>
-          ) : (
-            "Load older activities"
-          )}
-        </Button>
-      </div>
+      {!loading && activities.length > 0 && (
+        <div className="flex flex-col items-center gap-3 pt-4">
+          <p className="text-xs text-muted-foreground">Showing {" "}{filteredActivities.length} logs</p>
+          <Button 
+            variant="ghost" 
+            disabled={true}
+            className="text-primary font-medium hover:bg-primary/10 rounded-xl px-8 h-10"
+          >
+            End of History
+          </Button>
+        </div>
+      )}
     </div>
   );
 }

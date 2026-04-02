@@ -184,10 +184,19 @@ export default function ProfilePage() {
     }
   }
 
-  const handleSave = () => {
+  const [isSaving, setIsSaving] = useState(false);
+
+  const handleSave = async () => {
     if (!profile) return;
-    saveProfile(profile);
-    toast.success("Profile saved successfully");
+    setIsSaving(true);
+    try {
+      await saveProfile(profile);
+      toast.success("Profile saved successfully");
+    } catch (e) {
+      toast.error("Failed to save profile");
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   const updateField = (field: keyof UserProfile, value: unknown) => {
@@ -335,8 +344,9 @@ export default function ProfilePage() {
             This data powers all your generated resumes.
           </p>
         </div>
-        <Button onClick={handleSave} className="gap-2 rounded-xl shadow-sm">
-          <Save className="w-4 h-4" /> Save Changes
+        <Button onClick={handleSave} disabled={isSaving} className="gap-2 rounded-xl shadow-sm w-[140px]">
+          {isSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+          {isSaving ? "Saving..." : "Save Changes"}
         </Button>
       </div>
 

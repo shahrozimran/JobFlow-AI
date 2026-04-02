@@ -159,6 +159,11 @@ export async function saveProfile(profile: Partial<UserProfile>): Promise<UserPr
       throw error;
     }
     
+    // Instantly cache onboarding success in the browser to ensure instantaneous Next.js navigation
+    if (newProfile.completedOnboarding && typeof window !== 'undefined') {
+      document.cookie = "jobflow_onboarded=true; path=/; max-age=31536000; SameSite=Lax";
+    }
+
     return newProfile;
   } catch (error) {
     console.error("Error saving profile:", error);
