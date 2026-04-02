@@ -96,17 +96,21 @@ export default function MyResumesPage() {
         const { ModernSplitPdfTemplate } = await import("@/components/resume-templates/ModernSplitPdfTemplate");
         pdfComponent = <ModernSplitPdfTemplate data={data} />;
       }
-      const blob = await pdf(pdfComponent).toBlob();
-      const url = URL.createObjectURL(blob);
+      const rawBlob = await pdf(pdfComponent).toBlob();
+      // Ensure the blob has the correct MIME type for PDF
+      const pdfBlob = new Blob([rawBlob], { type: "application/pdf" });
+      const url = URL.createObjectURL(pdfBlob);
       const link = document.createElement("a");
       link.href = url;
       link.download = `JobFlow_Resume_${resume.targetRole.replace(/\s+/g, "_")}.pdf`;
+      link.type = "application/pdf";
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
-      URL.revokeObjectURL(url);
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
       toast.success("Resume exported!");
-    } catch {
+    } catch (err) {
+      console.error("PDF export error:", err);
       toast.error("Failed to export resume.");
     } finally {
       setExportingId(null);

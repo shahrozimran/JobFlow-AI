@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
+import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   FileText,
@@ -13,6 +14,7 @@ import {
   ArrowLeft,
   CheckCircle2,
   Copy,
+  Edit3,
   RotateCcw,
   Briefcase,
   Check,
@@ -61,6 +63,7 @@ const steps = [
 ];
 
 export default function ResumeWorkspacePage() {
+  const router = useRouter();
   const [step, setStep] = useState<Step>(1);
   const [jobDescription, setJobDescription] = useState("");
   const [targetRole, setTargetRole] = useState("");
@@ -72,6 +75,7 @@ export default function ResumeWorkspacePage() {
   const [generatingStep, setGeneratingStep] = useState(0);
   const [profile, setProfile] = useState<UserProfile>(defaultProfile);
   const [isExporting, setIsExporting] = useState(false);
+  const [savedResumeId, setSavedResumeId] = useState<string | null>(null);
   
   const resumeRef = useRef<HTMLDivElement>(null);
 
@@ -130,6 +134,7 @@ export default function ResumeWorkspacePage() {
       setAtsScore(data.atsScore);
 
       const newId = generateResumeId();
+      setSavedResumeId(newId);
       await saveResume({
         id: newId,
         targetRole,
@@ -162,6 +167,7 @@ export default function ResumeWorkspacePage() {
     setOptimizationType(null);
     setSelectedTemplate("");
     setGeneratingStep(0);
+    setSavedResumeId(null);
   };
 
   const handleCopy = () => {
@@ -192,16 +198,19 @@ export default function ResumeWorkspacePage() {
       }
 
       // Generate actual vector PDF natively
-      const blob = await pdf(pdfComponent).toBlob();
-      const url = URL.createObjectURL(blob);
+      const rawBlob = await pdf(pdfComponent).toBlob();
+      // Ensure the blob has the correct MIME type for PDF
+      const pdfBlob = new Blob([rawBlob], { type: "application/pdf" });
+      const url = URL.createObjectURL(pdfBlob);
       
       const link = document.createElement("a");
       link.href = url;
       link.download = `JobFlow_Resume_${targetRole.replace(/\s+/g, "_")}.pdf`;
+      link.type = "application/pdf";
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
-      URL.revokeObjectURL(url);
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
       
       toast.success("Resume exported successfully!", { id: toastId });
     } catch (error) {
@@ -233,6 +242,15 @@ export default function ResumeWorkspacePage() {
             >
               <RotateCcw className="w-3.5 h-3.5" /> New Resume
             </Button>
+            {savedResumeId && (
+              <Button
+                variant="outline"
+                onClick={() => router.push(`/dashboard/resumes/${savedResumeId}`)}
+                className="gap-2 rounded-xl text-sm"
+              >
+                <Edit3 className="w-3.5 h-3.5" /> Edit Resume
+              </Button>
+            )}
             <Button 
               className="gap-2 rounded-xl text-sm shadow-sm"
               onClick={handleExportPDF}
