@@ -36,6 +36,13 @@ const milestones = [
   { year: "2026", event: "Launched Premium tier with bulk outreach and analytics" },
 ];
 
+import type { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: 'About Us | JobFlow AI',
+  description: 'Learn about the team and mission behind JobFlow AI to revolutionize the job search process with advanced AI.',
+};
+
 export default function AboutPage() {
   return (
     <div className="min-h-screen bg-background">

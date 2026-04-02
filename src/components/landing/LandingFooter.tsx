@@ -26,18 +26,7 @@ export default function LandingFooter() {
               AI.
             </p>
 
-            {/* Newsletter */}
-            <div className="flex gap-2 max-w-sm">
-              <input
-                type="email"
-                placeholder="Enter your email"
-                className="flex-1 px-4 py-2.5 rounded-xl bg-background border border-border/50 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/30 transition-all placeholder:text-muted-foreground"
-                aria-label="Email address for newsletter"
-              />
-              <button className="px-5 py-2.5 rounded-xl bg-primary text-primary-foreground text-sm font-semibold hover:opacity-90 transition-all shadow-sm active:scale-[0.98]">
-                Subscribe
-              </button>
-            </div>
+
 
             <div className="flex items-center gap-3 mt-6">
               <Link
@@ -83,7 +72,7 @@ export default function LandingFooter() {
               </li>
               <li>
                 <Link
-                  href="/dashboard"
+                  href="/login"
                   className="text-sm text-muted-foreground hover:text-foreground transition-colors"
                 >
                   Log In

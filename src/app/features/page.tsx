@@ -56,6 +56,13 @@ const stats = [
   { icon: Zap, value: "< 30s", label: "Analysis Time" },
 ];
 
+import type { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: 'Features | JobFlow AI',
+  description: 'Explore the powerful features of JobFlow AI, including ATS-friendly resume generation, AI rewriting, and smart outreach.',
+};
+
 export default function FeaturesPage() {
   return (
     <div className="min-h-screen bg-background">

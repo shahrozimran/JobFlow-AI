@@ -6,6 +6,9 @@ import { analyzeKeywords } from "@/lib/ai/services/keyword-optimizer";
 import { rewriteResume } from "@/lib/ai/services/resume-rewriter";
 import { calculateAtsScore } from "@/lib/ai/services/scoring-engine";
 
+// Rate limiting map (UserId -> { count, windowStart })
+const rateLimitMap = new Map<string, { count: number, windowStart: number }>();
+
 export const dynamic = "force-dynamic";
 
 export async function POST(req: NextRequest) {
@@ -21,6 +24,17 @@ export async function POST(req: NextRequest) {
 
     if (!user) {
       return NextResponse.json({ error: "User not authenticated." }, { status: 401 });
+    }
+
+    // In-memory rate limiting (Replace with Redis/Upstash for multi-instance production)
+    const now = Date.now();
+    const record = rateLimitMap.get(user.id);
+    if (!record || (now - record.windowStart) > 60000) {
+      rateLimitMap.set(user.id, { count: 1, windowStart: now });
+    } else if (record.count >= 5) {
+      return NextResponse.json({ error: "Too many requests. Please try again in a minute." }, { status: 429 });
+    } else {
+      record.count += 1;
     }
 
     // 1. Fetch user profile

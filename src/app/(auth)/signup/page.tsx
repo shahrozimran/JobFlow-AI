@@ -10,6 +10,13 @@ import { toast } from "sonner";
 import { ArrowLeft, Loader2 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 
+import type { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: 'Sign Up | JobFlow AI',
+  description: 'Create your JobFlow AI account to build ATS-optimized resumes and accelerate your job search.',
+};
+
 export default function SignupPage() {
   const [isPending, startTransition] = useTransition();
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);

@@ -2,6 +2,7 @@ import "./globals.css";
 import { Providers } from "./providers";
 
 export const metadata = {
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "https://jobflow.ai"),
   title: "JobFlow AI",
   description: "Optimize your career with JobFlow AI. Create ATS-friendly resumes, automate your job search, and get personalized career outreach — all powered by advanced AI.",
   openGraph: {

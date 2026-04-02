@@ -33,6 +33,13 @@ import {
 
 
 
+import type { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: 'Dashboard | JobFlow AI',
+  description: 'Overview of your job search progress, active resumes, and ATS scores.',
+};
+
 export default function Dashboard() {
   const [profile, setProfile] = useState({ firstName: "", lastName: "" });
   const [completeness, setCompleteness] = useState(0);

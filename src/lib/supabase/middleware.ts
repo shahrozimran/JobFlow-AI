@@ -59,5 +59,28 @@ export async function updateSession(request: NextRequest) {
     return NextResponse.redirect(url);
   }
 
+  // Server-side Onboarding Check
+  if (user && request.nextUrl.pathname.startsWith("/dashboard")) {
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("completed_onboarding")
+      .eq("id", user.id)
+      .single();
+
+    const isOnboarding = request.nextUrl.pathname === "/dashboard/onboarding";
+
+    if (profile && !profile.completed_onboarding && !isOnboarding) {
+      const url = request.nextUrl.clone();
+      url.pathname = "/dashboard/onboarding";
+      return NextResponse.redirect(url);
+    }
+
+    if (profile && profile.completed_onboarding && isOnboarding) {
+      const url = request.nextUrl.clone();
+      url.pathname = "/dashboard";
+      return NextResponse.redirect(url);
+    }
+  }
+
   return supabaseResponse;
 }
